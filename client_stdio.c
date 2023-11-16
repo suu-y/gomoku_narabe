@@ -36,9 +36,9 @@ int main(void) {
     printf("%sに接続しました\n", destination);
 
     // ユーザー名をサーバに送信
-　　char buffer_name[1024];
-　　recv(s, buffer_name, 1024, 0);
-　　printf("%s", buffer_name);
+    char buffer_name[1024];
+    recv(s, buffer_name, 1024, 0);
+    printf("%s", buffer_name);
     scanf("%s", user_name);
     send(s, user_name, strlen(user_name), 0);
 
