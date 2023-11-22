@@ -1,81 +1,69 @@
-//http://blog.livedoor.jp/akf0/archives/51585502.html
-
 #include <stdio.h>
-
+#include <string.h>
 #include <winsock2.h>
 
-
-
 int main(void) {	
+    // アドレス、ポート番号、送信メッセージを入力
+    char destination[20];  // アドレス
+    int port;             // ポート番号
+    char user_name[100];  // ユーザー名
+    char message[100];    // 送信メッセージ
 
-	//接続するサーバの情報の構造体を用意
+    printf("アドレスを入力してください: ");
+    scanf("%s", destination);
 
-	struct sockaddr_in dest;
+    printf("ポート番号を入力してください: ");
+    scanf("%d", &port);
 
-	memset(&dest, 0, sizeof(dest));
+    // 接続するサーバの情報の構造体を用意
+    struct sockaddr_in dest;
+    memset(&dest, 0, sizeof(dest));
+    dest.sin_port = htons(port);  // ポート番号
+    dest.sin_family = AF_INET;
+    dest.sin_addr.s_addr = inet_addr(destination);
 
-	//サーバの情報を入力
+    // ソケット通信の準備・生成
+    WSADATA data;
+    WSAStartup(MAKEWORD(2, 0), &data);
+    SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
 
-	char destination[] = "172.28.15.10";  //アドレス
+    // サーバへの接続
+    if (connect(s, (struct sockaddr *) &dest, sizeof(dest))) {
+        printf("%sに接続できませんでした\n", destination);
+        return -1;
+    }
 
-	dest.sin_port = htons(11000);  //ポート番号
+    printf("%sに接続しました\n", destination);
 
-	dest.sin_family = AF_INET;
+    // ユーザー名をサーバに送信
+    char buffer_name[1024];
+    recv(s, buffer_name, 1024, 0);
+    printf("%s", buffer_name);
+    scanf("%s", user_name);
+    send(s, user_name, strlen(user_name), 0);
 
-	dest.sin_addr.s_addr = inet_addr(destination);
+    while (1) {
+        memset(&message, '\0', sizeof(message));
+        // サーバからデータを受信
+        recv(s, message, sizeof(message), 0);
+        if (strcmp(message, "start") != 0) {
+            printf("相手が置いた位置: ");
+        }
+        printf("%s\n", message);
+		
 
+        // 五目並べの石を置く座標をユーザーに入力
+        printf("どこに置きますか？: ");
+        scanf("%s", message);
 
+        // サーバにデータを送信
+        send(s, message, strlen(message), 0);
 
-	//ソケット通信の準備・生成
+    }
 
-	WSADATA data;
+    // Windows でのソケットの終了
+    closesocket(s);
+    WSACleanup();
 
-	WSAStartup(MAKEWORD(2, 0), &data);
-
-	SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
-
-
-
-	//サーバへの接続
-
-	if (connect(s, (struct sockaddr *) &dest, sizeof(dest))) {
-
-		printf("%sに接続できませんでした\n", destination);
-
-		return -1;
-
-	}
-
-	printf("%sに接続しました\n", destination);
-
-
-	char msg[] = "Hello Server!\n";
-	char buffer[1024];
-
-
-
-	//サーバにデータを送信
-
-	send(s, msg, strlen(msg), 0);
-
-
-
-	//サーバからデータを受信
-
-	recv(s, buffer, 1024, 0);
-
-	printf("→ %s\n\n", buffer);
-
-
-
-	// Windows でのソケットの終了
-
-	closesocket(s);
-
-	WSACleanup();
-
-
-
-	return 0;
-
+    return 0;
 }
