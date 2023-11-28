@@ -98,7 +98,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     // x-1, y-1から右斜め，左斜めの順番に何個並ぶか確認していく
     // 左下に何個並ぶか確認。最大4個([x-1][y-1]部分を除くので)
     // 仮にboard内に何もないところは0，自分が置いたところは1，相手が置いたところは2で格納されているとする
-    int i, x2 = x-2, y2 = y-2;
+    int i, x2 = x-2, y2 = y;
     for(i=0; i<4;i++)
     {
         if(board[x2--][y2++]==1) cnt++;
@@ -107,7 +107,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     if(cnt==5) return 1;
     // 右上に何個並ぶか確認。
     // 仮にboard内に何もないところは0，自分が置いたところは1，相手が置いたところは2で格納されているとする
-    x2 = x; y2 = y;
+    x2 = x; y2 = y-2;
     for(i=0; i<4;i++)
     {
         if(board[x2++][y2--]==1) cnt++;
@@ -117,7 +117,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 
     // 右下に何個並ぶか確認。
     // 仮にboard内に何もないところは0，自分が置いたところは1，相手が置いたところは2で格納されているとする
-    cnt = 1; x2 = x; y2 = y-2;
+    cnt = 1; x2 = x; y2 = y;
     for(i=0;i<4;i++)
     {
         if(board[x2++][y2++]==1) cnt++;
@@ -127,7 +127,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     
     // 左上に何個並ぶか確認。
     // 仮にboard内に何もないところは0，自分が置いたところは1，相手が置いたところは2で格納されているとする
-    x2 = x-2; y2 = y;
+    x2 = x-2; y2 = y-2;
     for(i=0;i<4;i++)
     {
         if(board[x2--][y2--]==1) cnt++;

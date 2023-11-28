@@ -1,4 +1,3 @@
-#include <stdio.h>
 #define BOARD_SQUARE 15
 
 void win(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, char *message);

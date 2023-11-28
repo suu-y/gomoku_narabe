@@ -4,89 +4,91 @@
 #include "kachimake.h"
 
 int main(void) {	
-    // ƒAƒhƒŒƒXAƒ|[ƒg”Ô†A‘—MƒƒbƒZ[ƒW‚ğ“ü—Í
-    char destination[20];  // ƒAƒhƒŒƒX
-    int port;             // ƒ|[ƒg”Ô†
-    char user_name[100];  // ƒ†[ƒU[–¼
-    char message[100];    // ‘—MƒƒbƒZ[ƒW
+    // ã‚¢ãƒ‰ãƒ¬ã‚¹ã€ãƒãƒ¼ãƒˆç•ªå·ã€é€ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸ã‚’å…¥åŠ›
+    char destination[20];  // ã‚¢ãƒ‰ãƒ¬ã‚¹
+    int port;             // ãƒãƒ¼ãƒˆç•ªå·
+    char user_name[100];  // ãƒ¦ãƒ¼ã‚¶ãƒ¼å
+    char message[100];    // é€ä¿¡ãƒ¡ãƒƒã‚»ãƒ¼ã‚¸
 
-    printf("ƒAƒhƒŒƒX‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢: ");
+    printf("ã‚¢ãƒ‰ãƒ¬ã‚¹ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„: ");
     scanf("%s", destination);
 
-    printf("ƒ|[ƒg”Ô†‚ğ“ü—Í‚µ‚Ä‚­‚¾‚³‚¢: ");
+    printf("ãƒãƒ¼ãƒˆç•ªå·ã‚’å…¥åŠ›ã—ã¦ãã ã•ã„: ");
     scanf("%d", &port);
 
-    // Ú‘±‚·‚éƒT[ƒo‚Ìî•ñ‚Ì\‘¢‘Ì‚ğ—pˆÓ
+    // æ¥ç¶šã™ã‚‹ã‚µãƒ¼ãƒã®æƒ…å ±ã®æ§‹é€ ä½“ã‚’ç”¨æ„
     struct sockaddr_in dest;
     memset(&dest, 0, sizeof(dest));
-    dest.sin_port = htons(port);  // ƒ|[ƒg”Ô†
+    dest.sin_port = htons(port);  // ãƒãƒ¼ãƒˆç•ªå·
     dest.sin_family = AF_INET;
     dest.sin_addr.s_addr = inet_addr(destination);
 
-    // ƒ\ƒPƒbƒg’ÊM‚Ì€”õE¶¬
+    // ã‚½ã‚±ãƒƒãƒˆé€šä¿¡ã®æº–å‚™ãƒ»ç”Ÿæˆ
     WSADATA data;
     WSAStartup(MAKEWORD(2, 0), &data);
     SOCKET s = socket(AF_INET, SOCK_STREAM, 0);
 
-    // ƒT[ƒo‚Ö‚ÌÚ‘±
+    // ã‚µãƒ¼ãƒã¸ã®æ¥ç¶š
     if (connect(s, (struct sockaddr *) &dest, sizeof(dest))) {
-        printf("%s‚ÉÚ‘±‚Å‚«‚Ü‚¹‚ñ‚Å‚µ‚½\n", destination);
+        printf("%sã«æ¥ç¶šã§ãã¾ã›ã‚“ã§ã—ãŸ\n", destination);
         return -1;
     }
 
-    printf("%s‚ÉÚ‘±‚µ‚Ü‚µ‚½\n", destination);
+    printf("%sã«æ¥ç¶šã—ã¾ã—ãŸ\n", destination);
 
-    // ƒ†[ƒU[–¼‚ğƒT[ƒo‚É‘—M
+    // ãƒ¦ãƒ¼ã‚¶ãƒ¼åã‚’ã‚µãƒ¼ãƒã«é€ä¿¡
     char buffer_name[1024];
     recv(s, buffer_name, 1024, 0);
     printf("%s", buffer_name);
     scanf("%s", user_name);
     send(s, user_name, strlen(user_name), 0);
 
-    /* -----’Ç‰Á•”•ª----- */
-    char *token;
+    /* -----è¿½åŠ éƒ¨åˆ†----- */
+    char *token, *str;
     int x, y;
-    int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // ‰½‚à’u‚©‚ê‚Ä‚¢‚È‚¢êŠ‚ğ0C©•ª‚ª’u‚¢‚½ˆÊ’u‚ğ1C‘Šè‚ª’u‚¢‚½ˆÊ’u‚ğ2
-    /* -----‚±‚±‚Ü‚Å----- */
+    int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // ä½•ã‚‚ç½®ã‹ã‚Œã¦ã„ãªã„å ´æ‰€ã‚’0ï¼Œè‡ªåˆ†ãŒç½®ã„ãŸä½ç½®ã‚’1ï¼Œç›¸æ‰‹ãŒç½®ã„ãŸä½ç½®ã‚’2
+    /* -----ã“ã“ã¾ã§----- */
     
     while (1) {
         memset(&message, '\0', sizeof(message));
-        // ƒT[ƒo‚©‚çƒf[ƒ^‚ğóM
+        // ã‚µãƒ¼ãƒã‹ã‚‰ãƒ‡ãƒ¼ã‚¿ã‚’å—ä¿¡
         recv(s, message, sizeof(message), 0);
         if (strcmp(message, "start") != 0) {
-            printf("‘Šè‚ª’u‚¢‚½ˆÊ’u: ");
+            printf("ç›¸æ‰‹ãŒç½®ã„ãŸä½ç½®: ");
+            /* -----è¿½åŠ éƒ¨åˆ†----- */
+            strcpy(str, message);
+            token=strtok(str,",");
+            x = atoi(token);
+            token=strtok(NULL, ",");
+            y = atoi(token);
+            if(x && y) board[x-1][y-1] = 2;
+            /* -----ã“ã“ã¾ã§----- */
         }
         printf("%s\n", message);
 
-        /* -----’Ç‰Á•”•ª----- */
-        token=strtok(message,",");
-        x = atoi(token);
-        token=strtok(NULL, ",");
-        y = atoi(token);
-        board[x-1][y-1] = 2;
-        /* -----‚±‚±‚Ü‚Å----- */
 
-        // ŒÜ–Ú•À‚×‚ÌÎ‚ğ’u‚­À•W‚ğƒ†[ƒU[‚É“ü—Í
-        printf("‚Ç‚±‚É’u‚«‚Ü‚·‚©H: ");
+        // äº”ç›®ä¸¦ã¹ã®çŸ³ã‚’ç½®ãåº§æ¨™ã‚’ãƒ¦ãƒ¼ã‚¶ãƒ¼ã«å…¥åŠ›
+        printf("ã©ã“ã«ç½®ãã¾ã™ã‹ï¼Ÿ: ");
         scanf("%s", message);
 
-        /* -----’Ç‰Á•”•ª----- */
-        token=strtok(message,",");
+        /* -----è¿½åŠ éƒ¨åˆ†----- */
+        strcpy(str, message);
+        token=strtok(str,",");
         x = atoi(token);
         token=strtok(NULL, ",");
         y = atoi(token);
-        board[x-1][y-1] = 1;
+        if(x && y) board[x-1][y-1] = 1;
 
         win(board, x, y, message);
-        /* -----‚±‚±‚Ü‚Å----- */
+        /* -----ã“ã“ã¾ã§----- */
 
-        // ƒT[ƒo‚Éƒf[ƒ^‚ğ‘—M
+        // ã‚µãƒ¼ãƒã«ãƒ‡ãƒ¼ã‚¿ã‚’é€ä¿¡
         send(s, message, strlen(message), 0);
 
 
     }
 
-    // Windows ‚Å‚Ìƒ\ƒPƒbƒg‚ÌI—¹
+    // Windows ã§ã®ã‚½ã‚±ãƒƒãƒˆã®çµ‚äº†
     closesocket(s);
     WSACleanup();
 
