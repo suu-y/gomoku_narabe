@@ -150,7 +150,7 @@ int main(int argc, char* argv[]){
   }
 
   //クライアントへデータを送信する
-  result = send(s1, "player1 name =", 20, 0);
+  result = send(s1, "player1 name = ", 20, 0);
 
   //クライアントから送信されたデータの受信
   result = recv(s1, name1, 20, 0);
@@ -220,7 +220,7 @@ int main(int argc, char* argv[]){
   }
 
   //クライアントへデータを送信する
-  result = send(s3, "player2 name=", 20, 0);
+  result = send(s3, "player2 name= ", 20, 0);
 
   //クライアントから送信されたデータの受信
   result = recv(s3, name2, 20, 0);
@@ -296,4 +296,3 @@ int main(int argc, char* argv[]){
   return 0;
 
 }
-

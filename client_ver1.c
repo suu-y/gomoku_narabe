@@ -53,6 +53,10 @@ int main(void) {
         memset(&message, '\0', sizeof(message));
         // サーバからデータを受信
         recv(s, message, sizeof(message), 0);
+        if(strcmp(message, "end")==0)
+        {
+            break;
+        }
         if (strcmp(message, "start") != 0) {
             printf("相手が置いた位置: ");
             /* -----追加部分----- */
@@ -61,7 +65,7 @@ int main(void) {
             x = atoi(token);
             token=strtok(NULL, ",");
             y = atoi(token);
-            if(x && y) board[x-1][y-1] = 2;
+            if(x>0 && y>0) board[x-1][y-1] = 2;
             /* -----ここまで----- */
         }
         printf("%s\n", message);
@@ -77,7 +81,7 @@ int main(void) {
         x = atoi(token);
         token=strtok(NULL, ",");
         y = atoi(token);
-        if(x && y) board[x-1][y-1] = 1;
+        if(x>0 && y>0) board[x-1][y-1] = 1;
 
         win(board, x, y, message);
         /* -----ここまで----- */
