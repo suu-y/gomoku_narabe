@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <winsock2.h>
+#include "./judge.h"
 
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
@@ -42,12 +43,29 @@ int main(void) {
     scanf("%s", user_name);
     send(s, user_name, strlen(user_name), 0);
 
+    /* -----追加部分----- */
+    char *token, *str;
+    int x, y;
+    int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // 何も置かれていない場所を0，自分が置いた位置を1，相手が置いた位置を2
+    /* -----ここまで----- */
+    
     while (1) {
         memset(&message, '\0', sizeof(message));
         // サーバからデータを受信
         recv(s, message, sizeof(message), 0);
         if (strcmp(message, "start") != 0) {
             printf("相手が置いた位置: ");
+            /* -----追加部分----- */
+            strcpy(str, message);
+            token=strtok(str,",");
+            x = atoi(token);
+            token=strtok(NULL, ",");
+            y = atoi(token);
+            if(x && y) board[x-1][y-1] = 2;
+
+            // 相手の手の禁じ手を確認
+            judge_chouren(x-1, y-1, board);
+            /* -----ここまで----- */
         }
         printf("%s\n", message);
 
@@ -56,8 +74,21 @@ int main(void) {
         printf("どこに置きますか？: ");
         scanf("%s", message);
 
+        /* -----追加部分----- */
+        strcpy(str, message);
+        token=strtok(str,",");
+        x = atoi(token);
+        token=strtok(NULL, ",");
+        y = atoi(token);
+        if(x && y) board[x-1][y-1] = 1;
+
+        // 自分の手の禁じ手を確認
+        judge_chouren(x-1, y-1, board);
+        /* -----ここまで----- */
+
         // サーバにデータを送信
         send(s, message, strlen(message), 0);
+
 
     }
 
