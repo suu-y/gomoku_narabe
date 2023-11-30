@@ -157,4 +157,113 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         }
     }
 
+    // =============== 斜め方向 判定 ============================================
+
+    // 初めに / 方向を判定する
+    int diagonal_right_upper_exists = 0;    // 斜め右上方向に石が4連or3連
+    int diagonal_left_lower_exists = 0;     // 斜め左下方向に石が4連or3連
+
+    // 両隣に石があるのは必須
+    if(board[x+1][y-1] == judge_x_o && board[x-1][y+1] == judge_x_o
+            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
+        // 斜め右上方向を調査
+        if(board[x+4][y-4] == judge_x_o 
+                && ((x+4)<BOARD_SQUARE && (y-4)>=0)){    // 「4連-1連」の長連を判定
+            for(int i=3; i>1; i--){
+                if(board[x+i][y-i] == judge_x_o){
+                    diagonal_right_upper_exists = 1;
+                }else{
+                    diagonal_right_upper_exists = 0;
+                    break;
+                }
+            }
+
+        }
+        else if(board[x+3][y-3] == judge_x_o
+                && ((x+3)<BOARD_SQUARE && (y-3)>=0)){   // 「2連-3連」の長連を判定
+            if((board[x+2][y-2] == judge_x_o && board[x-2][y+2] == judge_x_o)
+                    && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
+                diagonal_right_upper_exists = 1;
+            }
+        }
+
+        // 斜め左下方向を調査
+        if(board[x-4][y+4] == judge_x_o 
+                && ((x-4)>=0 && (y+4)<BOARD_SQUARE)){    // 「4連-1連」の長連を判定
+            for(int i=3; i>1; i--){
+                if(board[x-i][y+i] == judge_x_o){
+                    diagonal_left_lower_exists = 1;
+                }else{
+                    diagonal_left_lower_exists = 0;
+                    break;
+                }
+            }
+        }
+        else if(board[x-3][y+3] == judge_x_o
+                && ((x-3)>=0 && (y+3)<BOARD_SQUARE)){   // 「2連-3連」の長連を判定
+            if((board[x+2][y-2] == judge_x_o && board[x-2][y+2] == judge_x_o)
+                    && ((x+2)<BOARD_SQUARE && (y-2)>=0)){
+                diagonal_left_lower_exists = 1;
+            }
+        } 
+    }
+    if(diagonal_right_upper_exists == 1 || diagonal_left_lower_exists == 1){
+        chouren_flag = 1;
+        printf("長連です, ゲーム終了(斜め/)");
+        return 1;
+    }
+
+    // 次に \ 方向を判定する
+    int diagonal_left_upper_exists = 0;    // 斜め左上方向に石が4連or3連
+    int diagonal_right_lower_exists = 0;     // 斜め右下方向に石が4連or3連
+
+    if(board[x-1][y-1] == judge_x_o && board[x+1][y+1] == judge_x_o
+            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
+        // 斜め左上方向を調査
+        if(board[x-4][y-4] == judge_x_o 
+                && ((x-4)>=0 && (y-4)>=0)){    // 「4連-1連」の長連を判定
+            for(int i=3; i>1; i--){
+                if(board[x-i][y-i] == judge_x_o){
+                    diagonal_left_upper_exists = 1;
+                }else{
+                    diagonal_left_upper_exists = 0;
+                    break;
+                }
+            }
+
+        }
+        else if(board[x-3][y-3] == judge_x_o
+                && ((x-3)>=0 && (y-3)>=0)){   // 「2連-3連」の長連を判定
+            if((board[x-2][y-2] == judge_x_o && board[x+2][y+2] == judge_x_o)
+                    && ((x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE)){
+                diagonal_left_upper_exists = 1;
+            }
+        }
+
+        // 斜め右下方向を調査
+        if(board[x+4][y+4] == judge_x_o 
+                && ((x+4)<BOARD_SQUARE && (y+4)<BOARD_SQUARE)){    // 「4連-1連」の長連を判定
+            for(int i=3; i>1; i--){
+                if(board[x+i][y+i] == judge_x_o){
+                    diagonal_right_lower_exists = 1;
+                }else{
+                    diagonal_right_lower_exists = 0;
+                    break;
+                }
+            }
+        }
+        else if(board[x+3][y+3] == judge_x_o
+                && ((x+3)<BOARD_SQUARE && (y+3)<BOARD_SQUARE)){   // 「2連-3連」の長連を判定
+            if((board[x+2][y+2] == judge_x_o && board[x-2][y-2] == judge_x_o)
+                    && ((x-2)>=0 && (y-2)>=0)){
+                diagonal_right_lower_exists = 1;
+            }
+        } 
+    }
+    if(diagonal_left_upper_exists == 1 || diagonal_right_lower_exists == 1){
+        chouren_flag = 1;
+        printf("長連です, ゲーム終了(斜め\\)");
+        return 1;
+    }    
+
 }
