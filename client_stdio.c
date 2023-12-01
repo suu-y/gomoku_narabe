@@ -65,6 +65,7 @@ int main(void) {
 
             // 相手の手の禁じ手を確認
             judge_chouren(x-1, y-1, board);
+            judge_33(x-1, y-1, board);
             /* -----ここまで----- */
         }
         printf("%s\n", message);

@@ -5,11 +5,92 @@
 #include <stdlib.h>
 #include "./judge.h"
 
+int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
+
+    /*
+     * 三三禁は -|, -\, -/, |\, |/, \/ の6通りの列の組み合わせ間で成立する
+     *
+     * Args:
+     *  x - 石を置くx座標
+     *  y - 石を置くy座標
+     *  board - 現在の盤面の状態
+     */
+
+    int judge_x_o = board[x][y];    // 今回判定する石の種類
+
+    // フラグをビット演算する
+    enum {
+        LEFT,           // 0
+        RIGHT,          // 1
+        LOWER,          // 2
+        UPPER,          // 3
+        RIGHT_LOWER,    // 4
+        LEFT_UPPER,     // 5
+        RIGHT_UPPER,    // 6
+        LEFT_LOWER      // 7
+    };
+
+    int flag = 0;  // 8bitでbitごとに上記8つのフラグを管理
+
+    // 左側2連の判定
+    if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
+        flag |= 1 << LEFT;
+    }
+    // 右側2連の判定
+    if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
+        flag |= 1 << RIGHT;
+    }    
+    // 下側2連の判定
+    if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
+        flag |= 1 << LOWER;
+    }
+    // 上側2連の判定
+    if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
+        flag |= 1 << UPPER;
+    }
+    // 斜め右下2連の判定
+    if((board[x+2][y+2] == judge_x_o && board[x+1][y+1] == judge_x_o)
+            && ((x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE)){
+        flag |= 1 << RIGHT_LOWER;
+    }
+    // 斜め左上2連の判定
+    if((board[x-2][y-2] == judge_x_o && board[x-1][y-1] == judge_x_o)
+            && ((x-2)>=0 && (y-2)>=0)){
+        flag |= 1 << LEFT_UPPER;
+    }
+    // 斜め右上2連の判定
+    if((board[x+2][y-2] == judge_x_o && board[x+1][y-1] == judge_x_o)
+            && ((x+2)<BOARD_SQUARE && (y-2)>=0)){
+        flag |= 1 << RIGHT_UPPER;
+    }
+    // 斜め左下2連の判定
+    if((board[x-2][y+2] == judge_x_o && board[x-1][y+1] == judge_x_o)
+            && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
+        flag |= 1 << LEFT_LOWER;
+    }
+
+    // 三三禁となるのは、8bit中2bit立っている∧それが同一直線状ではない
+    for (int i = 0; i < 8; ++i) {
+        for (int j = i + 1; j < 8; ++j) {
+            int condition = (1 << i) | (1 << j);
+
+            if ((flag == condition)
+                    && (!(i==0 && j==1) && !(i==2 && j==3) && !(i==4 && j==5) && !(i==6 && j==7))) {
+                printf("三三禁です、ゲーム終了");
+            }
+        }
+    }
+}
 
 int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     /*
      * 長連は「4連-1連」　または　「2連-3連」　の時に間に石を置くと成立する
+     *
+     * Args:
+     *  x - 石を置くx座標
+     *  y - 石を置くy座標
+     *  board - 現在の盤面の状態
      */
 
     int chouren_flag = 0;
