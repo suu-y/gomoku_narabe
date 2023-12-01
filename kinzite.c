@@ -75,7 +75,10 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             int condition = (1 << i) | (1 << j);
 
             if ((flag == condition)
-                    && (!(i==0 && j==1) && !(i==2 && j==3) && !(i==4 && j==5) && !(i==6 && j==7))) {
+                    && !(i==LEFT && j==RIGHT) 
+                    && !(i==LOWER && j==UPPER)
+                    && !(i==RIGHT_LOWER && j==LEFT_UPPER)
+                    && !(i==RIGHT_UPPER && j==LEFT_LOWER)) {
                 printf("三三禁です、ゲーム終了");
             }
         }
