@@ -16,21 +16,26 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      *  board - 現在の盤面の状態
      */
 
+    int flag_33 = 0;
     int judge_x_o = board[x][y];    // 今回判定する石の種類
 
     // フラグをビット演算する
     enum {
-        LEFT,           // 0
-        RIGHT,          // 1
-        LOWER,          // 2
-        UPPER,          // 3
-        RIGHT_LOWER,    // 4
-        LEFT_UPPER,     // 5
-        RIGHT_UPPER,    // 6
-        LEFT_LOWER      // 7
+        LEFT,               // 0
+        RIGHT,              // 1
+        LOWER,              // 2
+        UPPER,              // 3
+        RIGHT_LOWER,        // 4
+        LEFT_UPPER,         // 5
+        RIGHT_UPPER,        // 6
+        LEFT_LOWER,         // 7
+        HORIZONTAL_MID,     // 8
+        VERTICAL_MID,       // 9
+        DIAGONALLY_LEFT,    // 10
+        DIAGONALLY_RIGHT    // 11
     };
 
-    int flag = 0;  // 8bitでbitごとに上記8つのフラグを管理
+    int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
 
     // 左側2連の判定
     if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
@@ -68,20 +73,113 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
         flag |= 1 << LEFT_LOWER;
     }
+    // 水平方向左右の判定
+    if((board[x-1][y] == judge_x_o && board[x+1][y] == judge_x_o)
+            && ((x-1)>=0 && (x+1)<BOARD_SQUARE)){
+        flag |= 1 << HORIZONTAL_MID;
+    }
+    // 垂直方向上下の判定
+    if((board[x][y-1] == judge_x_o && board[x][y+1] == judge_x_o)
+            && ((y-1)>=0 && (y+1)<BOARD_SQUARE)){
+        flag |= 1 << VERTICAL_MID;
+    }
+    // 左斜め方向上下の判定
+    if((board[x-1][y-1] == judge_x_o && board[x+1][y+1] == judge_x_o)
+            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
+        flag |= 1 << DIAGONALLY_LEFT;
+    }            
+    // 右斜め方向上下の判定
+    if((board[x+1][y-1] == judge_x_o && board[x-1][y+1] == judge_x_o)
+            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
+        flag |= 1 << DIAGONALLY_RIGHT;
+    }  
 
-    // 三三禁となるのは、8bit中2bit立っている∧それが同一直線状ではない
-    for (int i = 0; i < 8; ++i) {
-        for (int j = i + 1; j < 8; ++j) {
-            int condition = (1 << i) | (1 << j);
-
-            if ((flag == condition)
+    /*
+     * 三三禁になるのは、0-7bit間で2bit立つ ∧ 8-11bit間で2bit立つ
+     * しかし
+     * 「0-7bit間で2bit立つ」時に8-11bit間で同一方向のbitが1つ立つ　または
+     * 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ
+     * 時は三三禁ではない（四三）
+     */
+    int flag_tmp = flag;
+    int flag_0to7 = (flag &= 0b000011111111);
+    int flag_8to11 = (flag_tmp &= 0b111100000000);
+    for(int i = 0; i < 8; ++i) {
+        for(int j = i + 1; j < 8; ++j) {
+            int condition_2 = (1 << i) | (1 << j);
+            if((flag_0to7 == condition_2)
                     && !(i==LEFT && j==RIGHT) 
                     && !(i==LOWER && j==UPPER)
                     && !(i==RIGHT_LOWER && j==LEFT_UPPER)
                     && !(i==RIGHT_UPPER && j==LEFT_LOWER)) {
-                printf("三三禁です、ゲーム終了");
+                flag_33 = 1;
+                // 「0-7bit間で2bit立つ」時に8-11bit間で同一方向のbitが1つ立つ　時を調査
+                for(int h = 8; h < 12; ++h){
+                    int condition_1 = (1 << h);
+                    if(flag_8to11 == condition_1){
+                        switch(h){
+                            case 8:
+                                if(i==LEFT || i==RIGHT){
+                                    flag_33 = 0;
+                                } break;
+                            case 9:
+                                if(i==LOWER || i==UPPER){
+                                    flag_33 = 0;
+                                } break;
+                            case 10:
+                                if(i==RIGHT_LOWER || i==LEFT_UPPER){
+                                    flag_33 = 0;
+                                } break;
+                            case 11:
+                                if(i==RIGHT_UPPER || i==LEFT_LOWER){
+                                    flag_33 = 0;
+                                } break;
+                        }
+                    }
+                }
             }
         }
+    }
+
+
+    for(int i = 8; i < 12; ++i) {
+        for(int j = i + 1; j < 12; ++j) {
+            int condition_3 = (1 << i) | (1 << j);
+            if(flag_8to11 == condition_3) {
+                flag_33 = 1;
+                // 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ を調査
+                for(int h = 0; h < 8; ++h){
+                    int condition_4 = (1 << h);
+                    if(flag_0to7 == condition_4){
+                        switch(h){
+                            case 0:
+                            case 1:
+                                if(i==HORIZONTAL_MID){
+                                    flag_33 = 0;
+                                } break;
+                            case 2:
+                            case 3:
+                                if(i==VERTICAL_MID){
+                                    flag_33 = 0;
+                                } break;
+                            case 4:
+                            case 5:
+                                if(i==DIAGONALLY_LEFT){
+                                    flag_33 = 0;
+                                } break;
+                            case 6:
+                            case 7:
+                                if(i==DIAGONALLY_RIGHT){
+                                    flag_33 = 0;
+                                } break;
+                        }
+                    }
+                }
+            }
+        }
+    }   
+    if(flag_33){
+        printf("三三禁です、ゲーム終了");
     }
 }
 
