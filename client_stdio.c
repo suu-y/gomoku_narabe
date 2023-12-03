@@ -64,9 +64,7 @@ int main(void) {
             if(x && y) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-            judge_chouren(x-1, y-1, board);
-            judge_33(x-1, y-1, board);
-            judge_44(x-1, y-1, board);
+            judge_kinzite(x-1, y-1, board);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
@@ -85,9 +83,7 @@ int main(void) {
         if(x && y) board[x-1][y-1] = 1;
 
         // 自分の手の禁じ手を確認
-        //judge_chouren(x-1, y-1, board);
-        //judge_33(x-1, y-1, board);
-        //judge_44(x-1, y-1, board);
+        judge_kinzite(x-1, y-1, board);
         /* -----ここまで----- */
 
         // サーバにデータを送信
