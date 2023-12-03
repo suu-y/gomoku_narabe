@@ -43,7 +43,7 @@ int judgeVertical(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     // 仮にboardに何もないところは0、自分が置いたところは1、相手が置いたところは2で格納されているとする
     for(i=0; i<4;i++)
     {
-        if(board[x2][y2--]==1) cnt++;
+        if(board[x2][y2]==1 && y2-->=0) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -52,7 +52,7 @@ int judgeVertical(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     y2 = y;
     for(i=0;i<4;i++)
     {
-        if(board[x2][y2++]==1) cnt++;
+        if(board[x2][y2]==1 && y2++<BOARD_SQUARE) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -74,7 +74,7 @@ int judgeWidth(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     // 仮にboardに何もないところは0、自分が置いたところは1、相手が置いたところは2で格納されているとする
     for(i=0; i<4;i++)
     {
-        if(board[x2--][y2]==1) cnt++;
+        if(board[x2][y2]==1 && x2-->=0) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -83,7 +83,7 @@ int judgeWidth(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     x2 = x;
     for(i=0;i<4;i++)
     {
-        if(board[x2++][y2]==1) cnt++;
+        if(board[x2][y2]==1 && x2++<BOARD_SQUARE) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -105,7 +105,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     int i, x2 = x-2, y2 = y;
     for(i=0; i<4;i++)
     {
-        if(board[x2--][y2++]==1) cnt++;
+        if(board[x2][y2]==1 && x2-->=0 && y2++<BOARD_SQUARE) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -114,7 +114,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     x2 = x; y2 = y-2;
     for(i=0; i<4;i++)
     {
-        if(board[x2++][y2--]==1) cnt++;
+        if(board[x2][y2]==1 && x2++<BOARD_SQUARE && y2-->=0) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -124,7 +124,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     cnt = 1; x2 = x; y2 = y;
     for(i=0;i<4;i++)
     {
-        if(board[x2++][y2++]==1) cnt++;
+        if(board[x2][y2]==1 && x2++<BOARD_SQUARE && y2++<BOARD_SQUARE) cnt++;
         else break;
     }
     if(cnt==5) return 1;
@@ -134,7 +134,7 @@ int judgeDiagonal(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     x2 = x-2; y2 = y-2;
     for(i=0;i<4;i++)
     {
-        if(board[x2--][y2--]==1) cnt++;
+        if(board[x2][y2]==1 && x2-->=0 && y2-->=0) cnt++;
         else break;
     }
     if(cnt==5) return 1;

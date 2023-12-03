@@ -36,6 +36,12 @@ int main(void) {
 
     printf("%sに接続しました\n", destination);
 
+    /* -----追加部分----- */
+    int turn;
+    if(port == 12345) turn = 0; // 先攻
+    else if(port == 12346) turn = 1; // 後攻
+    /* -----ここまで----- */
+
     // ユーザー名をサーバに送信
     char buffer_name[1024];
     recv(s, buffer_name, 1024, 0);
