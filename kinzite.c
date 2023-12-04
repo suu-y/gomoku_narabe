@@ -232,35 +232,35 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 4)     place_flag |= 1 << ooxoo;
+    if(cnt_horizontal == 3)     place_flag |= 1 << ooxoo;
     cnt_horizontal = 0;
     if((x+3)<BOARD_SQUARE && (x-1)>=0){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 4)     place_flag |= 1 << oxooo;    
+    if(cnt_horizontal == 3)     place_flag |= 1 << oxooo;    
     cnt_horizontal = 0;
     if((x+1)<BOARD_SQUARE && (x-3)>=0){     // ・・・＋・
         for(int i=-1; i<4; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 4)     place_flag |= 1 << oooxo;  
+    if(cnt_horizontal == 3)     place_flag |= 1 << oooxo;  
     cnt_horizontal = 0;
     if((x+4)<BOARD_SQUARE){     // ＋・・・・
-        for(int i=1; i<5; i++){
+        for(int i=0; i<5; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 4)     place_flag |= 1 << xoooo; 
+    if(cnt_horizontal == 3)     place_flag |= 1 << xoooo; 
     cnt_horizontal = 0;
     if((x-4)>=0){               // ・・・・＋
-        for(int i=-4; i<0; i++){
+        for(int i=-4; i<1; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 4)     place_flag |= 1 << oooox;
+    if(cnt_horizontal == 3)     place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
@@ -282,35 +282,35 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 4)     place_flag |= 1 << ooxoo;
+    if(cnt_vertical == 3)     place_flag |= 1 << ooxoo;
     cnt_vertical = 0;
     if((y+3)<BOARD_SQUARE && (y-1)>=0){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 4)     place_flag |= 1 << oxooo;    
+    if(cnt_vertical == 3)     place_flag |= 1 << oxooo;    
     cnt_vertical = 0;
     if((y+1)<BOARD_SQUARE && (y-3)>=0){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 4)     place_flag |= 1 << oooxo;  
+    if(cnt_vertical == 3)     place_flag |= 1 << oooxo;  
     cnt_vertical = 0;
     if((y+4)<BOARD_SQUARE){     // ＋・・・・
-        for(int i=1; i<5; i++){
+        for(int i=0; i<5; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 4)     place_flag |= 1 << xoooo; 
+    if(cnt_vertical == 3)     place_flag |= 1 << xoooo; 
     cnt_vertical = 0;
     if((y-4)>=0){               // ・・・・＋
-        for(int i=-4; i<0; i++){
+        for(int i=-4; i<1; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 4)     place_flag |= 1 << oooox;
+    if(cnt_vertical == 3)     place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
@@ -332,35 +332,35 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 4)     place_flag |= 1 << ooxoo;
+    if(cnt_diagonally_left == 3)     place_flag |= 1 << ooxoo;
     cnt_diagonally_left = 0;
     if((x-1)>=0 && (y-1)>=0 && (x+3)<BOARD_SQUARE && (y+3)<BOARD_SQUARE){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 4)     place_flag |= 1 << oxooo;    
+    if(cnt_diagonally_left == 3)     place_flag |= 1 << oxooo;    
     cnt_diagonally_left = 0;
     if((x-3)>=0 && (y-3)>=0 && (x+1)<BOARD_SQUARE && (y+1)<BOARD_SQUARE){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 4)     place_flag |= 1 << oooxo;  
+    if(cnt_diagonally_left == 3)     place_flag |= 1 << oooxo;  
     cnt_diagonally_left = 0;
     if((x+4)<BOARD_SQUARE && (y+4)<BOARD_SQUARE){     // ＋・・・・
-        for(int i=1; i<5; i++){
+        for(int i=0; i<5; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 4)     place_flag |= 1 << xoooo; 
+    if(cnt_diagonally_left == 3)     place_flag |= 1 << xoooo; 
     cnt_diagonally_left = 0;
     if((x-4)>=0 && (y-4)>=0){               // ・・・・＋
-        for(int i=-4; i<0; i++){
+        for(int i=-4; i<1; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 4)     place_flag |= 1 << oooox;
+    if(cnt_diagonally_left == 3)     place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
@@ -382,35 +382,35 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 4)     place_flag |= 1 << ooxoo;
+    if(cnt_diagonally_right == 3)     place_flag |= 1 << ooxoo;
     cnt_diagonally_right = 0;
     if((x+3)<BOARD_SQUARE && (y-3)>=0 && (x-1)>=0 && (y+1)<BOARD_SQUARE){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 4)     place_flag |= 1 << oxooo;    
+    if(cnt_diagonally_right == 3)     place_flag |= 1 << oxooo;    
     cnt_diagonally_right = 0;
     if((x-1)>=0 && (y+1)<BOARD_SQUARE && (x+3)<BOARD_SQUARE && (y-1)>=0){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 4)     place_flag |= 1 << oooxo;  
+    if(cnt_diagonally_right == 3)     place_flag |= 1 << oooxo;  
     cnt_diagonally_right = 0;
     if((x+4)<BOARD_SQUARE && (y-4)>=0){     // ＋・・・・
-        for(int i=1; i<5; i++){
+        for(int i=0; i<5; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 4)     place_flag |= 1 << xoooo; 
+    if(cnt_diagonally_right == 3)     place_flag |= 1 << xoooo; 
     cnt_diagonally_right = 0;
     if((x-4)>=0 && (y+4)<BOARD_SQUARE){               // ・・・・＋
-        for(int i=-4; i<0; i++){
+        for(int i=-4; i<1; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 4)     place_flag |= 1 << oooox;
+    if(cnt_diagonally_right == 3)     place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {

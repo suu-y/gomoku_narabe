@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <winsock2.h>
-#include "kachimake.h"
+#include "./judge.h"
+#include "./kachimake.h"
 
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
@@ -9,6 +10,7 @@ int main(void) {
     int port;             // ポート番号
     char user_name[100];  // ユーザー名
     char message[100];    // 送信メッセージ
+    char str[100];
 
     printf("アドレスを入力してください: ");
     scanf("%s", destination);
@@ -35,7 +37,7 @@ int main(void) {
     }
 
     printf("%sに接続しました\n", destination);
-
+    
     /* -----追加部分----- */
     int turn;
     if(port == 12345) turn = 0; // 先攻
@@ -50,7 +52,7 @@ int main(void) {
     send(s, user_name, strlen(user_name), 0);
 
     /* -----追加部分----- */
-    char *token, *str;
+    char *token;
     int x, y;
     int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // 何も置かれていない場所を0，自分が置いた位置を1，相手が置いた位置を2
     /* -----ここまで----- */
@@ -59,11 +61,8 @@ int main(void) {
         memset(&message, '\0', sizeof(message));
         // サーバからデータを受信
         recv(s, message, sizeof(message), 0);
-        if(strcmp(message, "end")==0)
-        {
-            break;
-        }
-        if (strcmp(message, "start") != 0) {
+        if(strcmp(message, "end")==0) break;
+        else if (strcmp(message, "start") != 0) {
             printf("相手が置いた位置: ");
             /* -----追加部分----- */
             strcpy(str, message);
@@ -72,12 +71,15 @@ int main(void) {
             token=strtok(NULL, ",");
             y = atoi(token);
             if(x>0 && y>0) board[x-1][y-1] = 2;
+
+            // 相手の手の禁じ手を確認
+            judge_kinzite(x-1, y-1, board);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
 
-
         // 五目並べの石を置く座標をユーザーに入力
+        memset(&str, '\0', sizeof(str));
         printf("どこに置きますか？: ");
         scanf("%s", message);
 
@@ -89,6 +91,8 @@ int main(void) {
         y = atoi(token);
         if(x>0 && y>0) board[x-1][y-1] = 1;
 
+        // 自分の手の禁じ手を確認
+        judge_kinzite(x-1, y-1, board);
         win(board, x, y, message);
         /* -----ここまで----- */
 
