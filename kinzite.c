@@ -103,6 +103,7 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     /*
      * 三三禁になるのは、0-7bit間で2bit立つ または 8-11bit間で2bit立つ
+     * または　0-7bit, 8-11bit間で1bitずつ立つ
      * しかし
      * 「0-7bit間で2bit立つ」時に8-11bit間で同一方向のbitが1つ立つ　または
      * 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ
@@ -148,7 +149,6 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         }
     }
 
-
     for(int i = 8; i < 12; ++i) {
         for(int j = i + 1; j < 12; ++j) {
             int condition_3 = (1 << i) | (1 << j);
@@ -184,11 +184,26 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 }
             }
         }
-    }   
+    }
+    
+    // 0-7bit, 8-11bit間で1bitずつ立つ
+    for(int i = 0; i < 8; ++i) {
+        int condition_5 = (1 << i);
+        if(flag_0to7 == condition_5) {
+            for(int j = 8; j < 12; ++j) {
+                int condition_6 = (1 << j);
+                if(flag_8to11 == condition_6){
+                    flag_33 = 1;
+                }
+            }
+        }
+    } 
+
     if(flag_33){
         printf("三三禁です、ゲーム終了");
     }
 }
+
 
 int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
