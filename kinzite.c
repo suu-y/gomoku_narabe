@@ -5,9 +5,103 @@
 #include <stdlib.h>
 #include "./judge.h"
 
+// 三三禁フラグ用の、方向を表すbit
+enum {
+    LEFT,               // 0
+    RIGHT,              // 1
+    LOWER,              // 2
+    UPPER,              // 3
+    RIGHT_LOWER,        // 4
+    LEFT_UPPER,         // 5
+    RIGHT_UPPER,        // 6
+    LEFT_LOWER,         // 7
+    HORIZONTAL_MID,     // 8
+    VERTICAL_MID,       // 9
+    DIAGONALLY_LEFT,    // 10
+    DIAGONALLY_RIGHT    // 11
+};
+
+// int型整数を2進数に変換した時、何ビット目が立っているかを返す関数
+int find_first_set_bit(int num) {
+    if (num == 0) {
+        return -1; // 0の場合はどのビットも立っていない
+    }
+    int position = 0;
+    // ビットを右にシフトし、最下位ビットが立っているかどうかを確認
+    while ((num & 1) == 0) {
+        num = num >> 1;
+        position++;
+    }
+    return position;
+}
+
 int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
-    // 禁じ手判定の関数をまとめて呼び出す
-    judge_33(x, y, board);
+    
+    // 三三禁の判定を行うブロック文
+    {
+        /*
+         * judge_33()は、**引数で指定するx, y座標が交点となる三三**しか判定しない
+         * そこで judge_33()の返り値を「三」の方向フラグにし、
+         * 方向フラグに合わせて再度judge_33()を呼び出す
+         */
+
+        int flag = judge_33(x, y, board);
+        int position = find_first_set_bit(flag);
+        //printf("position: %d, flag: %d\n", position, flag);
+        switch (position){
+            case 0:     // LEFT方向を走査
+                judge_33(x-2, y, board);
+                judge_33(x-1, y, board);
+                break;
+            case 1:     // RIGHT方向を走査
+                judge_33(x+2, y, board);
+                judge_33(x+1, y, board);
+                break;
+            case 2:     // LOWER方向を走査
+                judge_33(x, y+2, board);
+                judge_33(x, y+1, board);
+                break;
+            case 3:     // UPPER方向を走査
+                judge_33(x, y-2, board);
+                judge_33(x, y-1, board);
+                break;
+            case 4:     // RIGHT_LOWER方向を走査
+                judge_33(x+2, y+2, board);
+                judge_33(x+1, y+1, board);
+                break;
+            case 5:     // LEFT_UPPER方向を走査
+                judge_33(x-2, y-2, board);
+                judge_33(x-1, y-1, board);
+                break;
+            case 6:     // RIGHT_UPPER方向を走査
+                judge_33(x+2, y-2, board);
+                judge_33(x+1, y-1, board);
+                break;
+            case 7:     // LEFT_LOWER方向を走査
+                judge_33(x-2, y+2, board);
+                judge_33(x-1, y+1, board);
+                break;
+            case 8:     // HORIZONTAL方向を走査
+                judge_33(x-1, y, board);
+                judge_33(x+1, y, board);
+                break;
+            case 9:     // VERTICAL方向を走査
+                judge_33(x, y-1, board);
+                judge_33(x, y+1, board);
+                break;
+            case 10:    // DIAGONALLY_LEFT方向を走査
+                judge_33(x-1, y-1, board);
+                judge_33(x+1, y+1, board);
+                break;
+            case 11:    // DIAGONALLY_RIGHT方向を走査
+                judge_33(x+1, y-1, board);
+                judge_33(x-1, y+1, board);
+                break;
+            default:
+                break;
+            }        
+    }
+    // TODO: この時5連の勝ち負け判定より三々判定が先に行われてしまうので、勝ち負け判定を優先すること
     judge_44(x, y, board);
     judge_chouren(x, y, board);
 }
@@ -25,22 +119,6 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     int flag_33 = 0;
     int judge_x_o = board[x][y];    // 今回判定する石の種類
-
-    // フラグをビット演算する
-    enum {
-        LEFT,               // 0
-        RIGHT,              // 1
-        LOWER,              // 2
-        UPPER,              // 3
-        RIGHT_LOWER,        // 4
-        LEFT_UPPER,         // 5
-        RIGHT_UPPER,        // 6
-        LEFT_LOWER,         // 7
-        HORIZONTAL_MID,     // 8
-        VERTICAL_MID,       // 9
-        DIAGONALLY_LEFT,    // 10
-        DIAGONALLY_RIGHT    // 11
-    };
 
     int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
 
@@ -109,7 +187,9 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      * 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ
      * 時は三三禁ではない（四三）
      */
+
     int flag_tmp = flag;
+    int flag_return = flag;
     int flag_0to7 = (flag &= 0b000011111111);
     int flag_8to11 = (flag_tmp &= 0b111100000000);
     for(int i = 0; i < 8; ++i) {
@@ -202,6 +282,8 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     if(flag_33){
         printf("三三禁です、ゲーム終了");
     }
+
+    return flag_return;
 }
 
 
