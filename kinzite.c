@@ -23,10 +23,10 @@ enum {
 
 // 四四禁フラグ用の、方向を表すbit
 enum {
-    HORIZONTAL,         // 0
-    VERTICAL,           // 1
-    DIAGONALLY_LEFT_2,    // 2
-    DIAGONALLY_RIGHT_2    // 3
+    HORIZONTAL,             // 0
+    VERTICAL,               // 1
+    DIAGONALLY_LEFT_2,      // 2
+    DIAGONALLY_RIGHT_2      // 3
 };
 
 // 四四禁の、同一方向内の石の配置フラグ用
@@ -129,7 +129,9 @@ int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         judge_44(x, y, board, &flag, &flag_direction);
         int position = find_first_set_bit(flag);
         int position_direction = find_first_set_bit(flag_direction);
-        printf("四四禁-方向フラグ: %d, 位置フラグ: %d\n", position, position_direction);
+        printf("\n四四禁-方向フラグ（変換後）: %d\n", position);
+        printf("位置フラグ（変換後）: %d\n", position_direction);
+
 
         switch (position){
             case 0:     // HORIZONTAL方向を走査
@@ -496,7 +498,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
     if(cnt_horizontal == 4)     *place_flag |= 1 << oxooo;    
     cnt_horizontal = 0;
     if((x+1)<BOARD_SQUARE && (x-3)>=0){     // ・・・＋・
-        for(int i=-1; i<4; i++){
+        for(int i=-3; i<2; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
@@ -521,6 +523,22 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
             if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                default:
+                    break;
+            }            
         }
         if(*place_flag == (1 << i)){
             *flag |= 1 << HORIZONTAL;
@@ -577,6 +595,22 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
             if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                default:
+                    break;
+            }  
         }
         if(*place_flag == (1 << i)){
             *flag |= 1 << VERTICAL;
@@ -633,6 +667,22 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
             if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                default:
+                    break;
+            }  
         }
         if(*place_flag == (1 << i)){
             *flag |= 1 << DIAGONALLY_LEFT_2;
@@ -689,6 +739,22 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
             if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                default:
+                    break;
+            }  
         }
         if(*place_flag == (1 << i)){
             *flag |= 1 << DIAGONALLY_RIGHT_2;
