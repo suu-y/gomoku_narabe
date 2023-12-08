@@ -38,230 +38,14 @@ enum {
     oooox     // 4
 };
 
-// int型整数を2進数に変換した時、何ビット目が立っているかを返す関数
-int find_first_set_bit(int num) {
-    if (num == 0) {
-        return -1; // 0の場合はどのビットも立っていない
-    }
-    int position = 0;
-    // ビットを右にシフトし、最下位ビットが立っているかどうかを確認
-    while ((num & 1) == 0) {
-        num = num >> 1;
-        position++;
-    }
-    return position;
-}
-
 int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
-    
-    // 三三禁の判定を行うブロック文
-    {
-        /*
-         * judge_33()は、**引数で指定するx, y座標が交点となる三三**しか判定しない
-         * そこで judge_33()の返り値を「三」の方向フラグにし、
-         * 方向フラグに合わせて再度judge_33()を呼び出す
-         */
+   
+    judge_33(x, y, board);
 
-        int flag = judge_33(x, y, board);
-        int position = find_first_set_bit(flag);
-        //printf("三々禁フラグ: %d, bit位置: %d\n", flag, position);
-        switch (position){
-            case 0:     // LEFT方向を走査
-                judge_33(x-2, y, board);
-                judge_33(x-1, y, board);
-                break;
-            case 1:     // RIGHT方向を走査
-                judge_33(x+2, y, board);
-                judge_33(x+1, y, board);
-                break;
-            case 2:     // LOWER方向を走査
-                judge_33(x, y+2, board);
-                judge_33(x, y+1, board);
-                break;
-            case 3:     // UPPER方向を走査
-                judge_33(x, y-2, board);
-                judge_33(x, y-1, board);
-                break;
-            case 4:     // RIGHT_LOWER方向を走査
-                judge_33(x+2, y+2, board);
-                judge_33(x+1, y+1, board);
-                break;
-            case 5:     // LEFT_UPPER方向を走査
-                judge_33(x-2, y-2, board);
-                judge_33(x-1, y-1, board);
-                break;
-            case 6:     // RIGHT_UPPER方向を走査
-                judge_33(x+2, y-2, board);
-                judge_33(x+1, y-1, board);
-                break;
-            case 7:     // LEFT_LOWER方向を走査
-                judge_33(x-2, y+2, board);
-                judge_33(x-1, y+1, board);
-                break;
-            case 8:     // HORIZONTAL方向を走査
-                judge_33(x-1, y, board);
-                judge_33(x+1, y, board);
-                break;
-            case 9:     // VERTICAL方向を走査
-                judge_33(x, y-1, board);
-                judge_33(x, y+1, board);
-                break;
-            case 10:    // DIAGONALLY_LEFT方向を走査
-                judge_33(x-1, y-1, board);
-                judge_33(x+1, y+1, board);
-                break;
-            case 11:    // DIAGONALLY_RIGHT方向を走査
-                judge_33(x+1, y-1, board);
-                judge_33(x-1, y+1, board);
-                break;
-            default:
-                break;
-            }        
-    }
-    // TODO: この時5連の勝ち負け判定より三々判定が先に行われてしまうので、勝ち負け判定を優先すること
-
-    // 四四禁の判定を行うブロック文
-    {
-        int flag, flag_direction;
-        flag = 0;
-        flag_direction = 0;
-        
-        judge_44(x, y, board, &flag, &flag_direction);
-        int position = find_first_set_bit(flag);
-        int position_direction = find_first_set_bit(flag_direction);
-        //printf("\n四四禁-方向フラグ（変換後）: %d\n", position);
-        //printf("位置フラグ（変換後）: %d\n", position_direction);
-
-
-        switch (position){
-            case 0:     // HORIZONTAL方向を走査
-                switch (position_direction){
-                    case 0:
-                        for(int i=-2; i<3; i++){
-                            judge_44(x+i, y, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 1:
-                        for(int i=-1; i<4; i++){
-                            judge_44(x+i, y, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 2:
-                        for(int i=-3; i<2; i++){
-                            judge_44(x+i, y, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 3:
-                        for(int i=0; i<5; i++){
-                            judge_44(x+i, y, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 4:
-                        for(int i=-4; i<1; i++){
-                            judge_44(x+i, y, board, &flag, &flag_direction);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 1:     // VERTICAL方向を走査
-                switch (position_direction){
-                    case 0:
-                        for(int i=-2; i<3; i++){
-                            judge_44(x, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 1:
-                        for(int i=-1; i<4; i++){
-                            judge_44(x, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 2:
-                        for(int i=-3; i<2; i++){
-                            judge_44(x, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 3:
-                        for(int i=0; i<5; i++){
-                            judge_44(x, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 4:
-                        for(int i=-4; i<1; i++){
-                            judge_44(x, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 2:     // DIAGONALLY_LEFT_2方向を走査
-                switch (position_direction){
-                    case 0:
-                        for(int i=-2; i<3; i++){
-                            judge_44(x+i, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 1:
-                        for(int i=-1; i<4; i++){
-                            judge_44(x+i, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 2:
-                        for(int i=-3; i<2; i++){
-                            judge_44(x+i, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 3:
-                        for(int i=0; i<5; i++){
-                            judge_44(x+i, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 4:
-                        for(int i=-4; i<1; i++){
-                            judge_44(x+i, y+i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            case 3:     // DIAGONALLY_RIGHT方向を走査
-                switch (position_direction){
-                    case 0:
-                        for(int i=-2; i<3; i++){
-                            judge_44(x+i, y-i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 1:
-                        for(int i=-1; i<4; i++){
-                            judge_44(x+i, y-i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 2:
-                        for(int i=-3; i<2; i++){
-                            judge_44(x+i, y-i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 3:
-                        for(int i=0; i<5; i++){
-                            judge_44(x+i, y-i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    case 4:
-                        for(int i=-4; i<1; i++){
-                            judge_44(x+i, y-i, board, &flag, &flag_direction);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-                break;
-            default:
-                break;
-            }    
-    }
+    int flag, flag_direction;
+    flag = 0;
+    flag_direction = 0;
+    judge_44(x, y, board, &flag, &flag_direction);
 
     judge_chouren(x, y, board);
 }
@@ -490,7 +274,7 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             }
         }
     }
-    
+
     // 0-7bit, 8-11bit間で1bitずつ立つ
     for(int i = 0; i < 8; ++i) {
         int condition_5 = (1 << i);
@@ -513,9 +297,11 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         break;
                     case 11:
                         if(i == 6 || i == 7)    flag_33 = 0;
+                        break;
                     default:
                         break;
                 }
+                break;
             }
         }
     } 
@@ -600,6 +386,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
                     break;
                 case 4:
                     if(i == oooxo)    flag_44 = 0;
+                    break;
                 default:
                     break;
             }            
@@ -672,6 +459,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
                     break;
                 case 4:
                     if(i == oooxo)    flag_44 = 0;
+                    break;
                 default:
                     break;
             }  
@@ -744,6 +532,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
                     break;
                 case 4:
                     if(i == oooxo)    flag_44 = 0;
+                    break;
                 default:
                     break;
             }  
@@ -816,6 +605,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
                     break;
                 case 4:
                     if(i == oooxo)    flag_44 = 0;
+                    break;
                 default:
                     break;
             }  
