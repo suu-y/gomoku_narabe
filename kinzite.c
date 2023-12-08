@@ -64,7 +64,7 @@ int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
         int flag = judge_33(x, y, board);
         int position = find_first_set_bit(flag);
-        printf("三々禁フラグ: %d, bit位置: %d\n", flag, position);
+        //printf("三々禁フラグ: %d, bit位置: %d\n", flag, position);
         switch (position){
             case 0:     // LEFT方向を走査
                 judge_33(x-2, y, board);
@@ -129,8 +129,8 @@ int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         judge_44(x, y, board, &flag, &flag_direction);
         int position = find_first_set_bit(flag);
         int position_direction = find_first_set_bit(flag_direction);
-        printf("\n四四禁-方向フラグ（変換後）: %d\n", position);
-        printf("位置フラグ（変換後）: %d\n", position_direction);
+        //printf("\n四四禁-方向フラグ（変換後）: %d\n", position);
+        //printf("位置フラグ（変換後）: %d\n", position_direction);
 
 
         switch (position){
@@ -279,45 +279,109 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     int flag_33 = 0;
     int judge_x_o = board[x][y];    // 今回判定する石の種類
+    int cnt_stone = 0;
 
     int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
 
     // 左側2連の判定
-    if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
-        flag |= 1 << LEFT;
+    if((x-3)>=0){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LEFT;
+
     // 右側2連の判定
-    if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
-        flag |= 1 << RIGHT;
-    }    
+    cnt_stone = 0;
+    if((x+3) < BOARD_SQUARE){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT;
+   
     // 下側2連の判定
-    if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
-        flag |= 1 << LOWER;
+    cnt_stone = 0;
+    if((y+3) < BOARD_SQUARE){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LOWER;
+
     // 上側2連の判定
-    if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
-        flag |= 1 << UPPER;
+    cnt_stone = 0;
+    if((y-3) >= 0){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << UPPER;
+
     // 斜め右下2連の判定
-    if((board[x+2][y+2] == judge_x_o && board[x+1][y+1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x+3)<BOARD_SQUARE && (y+3)<BOARD_SQUARE)){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y+2] == judge_x_o && board[x+1][y+1] == judge_x_o)
             && ((x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE)){
-        flag |= 1 << RIGHT_LOWER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT_LOWER;
+
     // 斜め左上2連の判定
-    if((board[x-2][y-2] == judge_x_o && board[x-1][y-1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x-3)>=0 && (y-3)>=0)){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x-2][y-2] == judge_x_o && board[x-1][y-1] == judge_x_o)
             && ((x-2)>=0 && (y-2)>=0)){
-        flag |= 1 << LEFT_UPPER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << LEFT_UPPER;
+
     // 斜め右上2連の判定
-    if((board[x+2][y-2] == judge_x_o && board[x+1][y-1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x+3)<BOARD_SQUARE && (y-3)>=0)){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y-2] == judge_x_o && board[x+1][y-1] == judge_x_o)
             && ((x+2)<BOARD_SQUARE && (y-2)>=0)){
-        flag |= 1 << RIGHT_UPPER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT_UPPER;
+
     // 斜め左下2連の判定
-    if((board[x-2][y+2] == judge_x_o && board[x-1][y+1] == judge_x_o)
-            && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
-        flag |= 1 << LEFT_LOWER;
+    cnt_stone = 0;
+    if((x-3)>=0 && (y+3)<BOARD_SQUARE){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x-2][y+2] == judge_x_o && board[x-1][y+1] == judge_x_o)
+            && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LEFT_LOWER;
+
     // 水平方向左右の判定
     if((board[x-1][y] == judge_x_o && board[x+1][y] == judge_x_o)
             && ((x-1)>=0 && (x+1)<BOARD_SQUARE)){
