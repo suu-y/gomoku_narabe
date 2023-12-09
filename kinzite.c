@@ -6,17 +6,25 @@
 #include "./judge.h"
 
 
-int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
+int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], char *message){
    
-    judge_33(x, y, board);
+    if(judge_33(x, y, board)){
+        printf(",forbidden (三三禁)");
+        strcat(message, ",forbidden (三三禁)");
+    }
 
-    // TODO: judge_44()の不要な引数(flag, flag_direction)を消す
     int flag, flag_direction;
     flag = 0;
     flag_direction = 0;
-    judge_44(x, y, board, &flag, &flag_direction);
+    if(judge_44(x, y, board, &flag, &flag_direction)){
+        printf(",forbidden (四四禁)\n");
+        strcat(message, ",forbidden (四四禁)");
+    }
 
-    judge_chouren(x, y, board);
+    if(judge_chouren(x, y, board)){
+        printf(",forbidden (長連)\n");
+        strcat(message, ",forbidden (長連)");      
+    }
 }
 
 int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
@@ -291,10 +299,7 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         }
     } 
 
-    if(flag_33){
-        printf(",forbidden (三三禁)");
-        return 1;
-    }
+    if(flag_33) return 1;
     else    return 0;
 }
 
@@ -632,10 +637,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
         }
     }
 
-    if(flag_44){
-        printf(",forbidden (四四禁)\n");
-        return 1; 
-    }
+    if(flag_44) return 1; 
     else    return 0;
 
 }
@@ -885,10 +887,7 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         chouren_flag = 1;
     }
 
-    if(chouren_flag){
-        printf(",forbidden (長連)\n");
-        return 1;
-    }
+    if(chouren_flag)    return 1;
     else    return 0;
 
 }
