@@ -9,11 +9,12 @@ enum {
 };
 
 /* 守りに徹するべきか，攻めに転じるべきかを判定
+ * 守りに徹する場合，二度走査するのは面倒なので，ここで打つ手を確定してしまう．
  * board : 盤の状況を把握
  * 返り値0 : 守り
  * 返り値1 : 攻め
  */
-int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE])
+int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
 {
     int rslt = 1;
     int flag = 0b0000; // 左、上、左上、右上にコマが存在するかを管理する．
@@ -43,18 +44,57 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE])
                 if(i>0 && board[j][i-1]==2) flag |= 1 << UPPER; // 上に相手のコマ
                 if(j>0 && i>0 && board[j-1][i-1]==2) flag |= 1 << LEFT_UPPER; // 左上に相手のコマ
                 if(j<BOARD_SQUARE-1 && i>0 && board[j+1][i-1]==2) flag |= 1 << RIGHT_UPPER; // 右上に相手のコマ
-
+            
+            // 左方向にコマがないのでそのまま調べていく
             if((flag&0b0001)==0b0000)
             {
                 cnt += countWidth(j,i);
                 // 3個の場合，守りに徹するので結果を返す
-                if(cnt==3) return 0;
+                if(cnt==3)
+                {
+                    // 置く場所を決める
+                    /* !!!!!未実装!!!!! */
+                    return 0;
+                }
                 // 2個の場合，飛び三の場合を考える
                 else if(cnt == 2)
                 {
+                    // j, iの位置から右に並んでいる、すなわちboard[j][i]とboard[j+1][i]に在る状態
+                    // したがって、飛び三の場合はboard[j-2][i]の時かboard[j+3][i]の時
+                    if((j-2>=0 && board[j-2][i]==2) || (j+3<BOARD_SQUARE && board[j+3][i]==2))
+                    {
+                        // 置く場所を決める
+                        /* !!!!!未実装!!!!! */
+                        return 0;
+                    }
                 }
             }
-            if((flag&0b0010)==0b0000) countVertical(j,i);
+
+            // 上方向にコマが無いので，そのまま調べる
+            if((flag&0b0010)==0b0000)
+            {
+                cnt += countVertical(j,i);
+                // 3個の場合，守りに徹するので結果を返す
+                if(cnt==3)
+                {
+                    // 置く場所を決める
+                    /* !!!!!未実装!!!!! */
+                    return 0;
+                }
+                // 2個の場合，飛び三の場合を考える
+                else if(cnt == 2)
+                {
+                    // j, iの位置から下に並んでいる、すなわちboard[j][i]とboard[j][i+1]に在る状態
+                    // したがって、飛び三の場合はboard[j][i-2]の時かboard[j][i+3]の時
+                    if((i-2>=0 && board[j][i-2]==2) || (i+3<BOARD_SQUARE && board[j][i+3]==2))
+                    {
+                        // 置く場所を決める
+                        /* !!!!!未実装!!!!! */
+                        return 0;
+                    }
+                }
+            }
+
             if((flag&0b0100)==0b0000) countDiagonallyLowerRight(j,i);
             if((flag&0b1000)==0b0000) countDiagonallyLowerLeft(j,i);
 
@@ -83,15 +123,6 @@ int countDiagonallyLowerRight(int x, int y)
 
 /* 左斜め下に自分を含めて何個並ぶか確認*/
 int countDiagonallyLowerLeft(int x, int y)
-{
-    
-}
-
-/* 守りに徹する場合，どこに置くべきかを判定
- * board : 盤の状況を把握
- * place : 置くべき座標を返す 
-*/
-place defense(int board[BOARD_SQUARE][BOARD_SQUARE])
 {
     
 }
