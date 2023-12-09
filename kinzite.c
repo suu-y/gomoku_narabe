@@ -374,6 +374,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
         }
     }
     if(cnt_horizontal == 4)     *place_flag |= 1 << oooox;
+
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
             int condition = (1 << i) | (1 << j);
@@ -425,6 +426,7 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
         }
     }
     if(cnt_vertical == 4)     *place_flag |= 1 << oxooo;    
+
     cnt_vertical = 0;
     if((y+1)<BOARD_SQUARE && (y-3)>=0){     // ・・・＋・
         for(int i=-3; i<2; i++){
