@@ -5,11 +5,26 @@
 #include <stdlib.h>
 #include "./judge.h"
 
-int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
-    // 禁じ手判定の関数をまとめて呼び出す
-    judge_33(x, y, board);
-    judge_44(x, y, board);
-    judge_chouren(x, y, board);
+
+int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], char *message){
+   
+    if(judge_33(x, y, board)){
+        printf(",forbidden (三三禁)");
+        strcat(message, ",forbidden (三三禁)");
+    }
+
+    int flag, flag_direction;
+    flag = 0;
+    flag_direction = 0;
+    if(judge_44(x, y, board, &flag, &flag_direction)){
+        printf(",forbidden (四四禁)\n");
+        strcat(message, ",forbidden (四四禁)");
+    }
+
+    if(judge_chouren(x, y, board)){
+        printf(",forbidden (長連)\n");
+        strcat(message, ",forbidden (長連)");      
+    }
 }
 
 int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
@@ -23,10 +38,7 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      *  board - 現在の盤面の状態
      */
 
-    int flag_33 = 0;
-    int judge_x_o = board[x][y];    // 今回判定する石の種類
-
-    // フラグをビット演算する
+    // 三三禁フラグ用の、方向を表すbit
     enum {
         LEFT,               // 0
         RIGHT,              // 1
@@ -42,44 +54,111 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         DIAGONALLY_RIGHT    // 11
     };
 
+    int flag_33 = 0;
+    int judge_x_o = board[x][y];    // 今回判定する石の種類
+    int cnt_stone = 0;
+
     int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
 
     // 左側2連の判定
-    if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
-        flag |= 1 << LEFT;
+    if((x-3)>=0){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LEFT;
+
     // 右側2連の判定
-    if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
-        flag |= 1 << RIGHT;
-    }    
+    cnt_stone = 0;
+    if((x+3) < BOARD_SQUARE){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT;
+   
     // 下側2連の判定
-    if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
-        flag |= 1 << LOWER;
+    cnt_stone = 0;
+    if((y+3) < BOARD_SQUARE){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LOWER;
+
     // 上側2連の判定
-    if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
-        flag |= 1 << UPPER;
+    cnt_stone = 0;
+    if((y-3) >= 0){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << UPPER;
+
     // 斜め右下2連の判定
-    if((board[x+2][y+2] == judge_x_o && board[x+1][y+1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x+3)<BOARD_SQUARE && (y+3)<BOARD_SQUARE)){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y+2] == judge_x_o && board[x+1][y+1] == judge_x_o)
             && ((x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE)){
-        flag |= 1 << RIGHT_LOWER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT_LOWER;
+
     // 斜め左上2連の判定
-    if((board[x-2][y-2] == judge_x_o && board[x-1][y-1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x-3)>=0 && (y-3)>=0)){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x-2][y-2] == judge_x_o && board[x-1][y-1] == judge_x_o)
             && ((x-2)>=0 && (y-2)>=0)){
-        flag |= 1 << LEFT_UPPER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << LEFT_UPPER;
+
     // 斜め右上2連の判定
-    if((board[x+2][y-2] == judge_x_o && board[x+1][y-1] == judge_x_o)
+    cnt_stone = 0;
+    if(((x+3)<BOARD_SQUARE && (y-3)>=0)){     // 飛び三
+        for(int i=1; i<4; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone++;
+        }
+    }
+    else if((board[x+2][y-2] == judge_x_o && board[x+1][y-1] == judge_x_o)
             && ((x+2)<BOARD_SQUARE && (y-2)>=0)){
-        flag |= 1 << RIGHT_UPPER;
+        cnt_stone = 2;
     }
+    if(cnt_stone == 2)     flag |= 1 << RIGHT_UPPER;
+
     // 斜め左下2連の判定
-    if((board[x-2][y+2] == judge_x_o && board[x-1][y+1] == judge_x_o)
-            && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
-        flag |= 1 << LEFT_LOWER;
+    cnt_stone = 0;
+    if((x-3)>=0 && (y+3)<BOARD_SQUARE){     // 飛び三
+        for(int i=-3; i<0; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone++;
+        }
     }
+    else if((board[x-2][y+2] == judge_x_o && board[x-1][y+1] == judge_x_o)
+            && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
+        cnt_stone = 2;
+    }
+    if(cnt_stone == 2)     flag |= 1 << LEFT_LOWER;
+
     // 水平方向左右の判定
     if((board[x-1][y] == judge_x_o && board[x+1][y] == judge_x_o)
             && ((x-1)>=0 && (x+1)<BOARD_SQUARE)){
@@ -103,12 +182,16 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     /*
      * 三三禁になるのは、0-7bit間で2bit立つ または 8-11bit間で2bit立つ
+     * または　0-7bit, 8-11bit間で1bitずつ立つ
      * しかし
      * 「0-7bit間で2bit立つ」時に8-11bit間で同一方向のbitが1つ立つ　または
-     * 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ
+     * 「8-11bit間で2bit立つ」時に0-7bit間で同一方向のbitが1つ立つ　または
+     * 「0-7bit, 8-11bit間で1bitずつ立つ」時にそのbit同士が同一方向
      * 時は三三禁ではない（四三）
      */
+
     int flag_tmp = flag;
+    //int flag_return = flag;   // フラグを返り値にする場合の変数宣言
     int flag_0to7 = (flag &= 0b000011111111);
     int flag_8to11 = (flag_tmp &= 0b111100000000);
     for(int i = 0; i < 8; ++i) {
@@ -148,7 +231,6 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         }
     }
 
-
     for(int i = 8; i < 12; ++i) {
         for(int j = i + 1; j < 12; ++j) {
             int condition_3 = (1 << i) | (1 << j);
@@ -184,13 +266,45 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 }
             }
         }
-    }   
-    if(flag_33){
-        printf("三三禁です、ゲーム終了");
     }
+
+    // 0-7bit, 8-11bit間で1bitずつ立つ
+    for(int i = 0; i < 8; ++i) {
+        int condition_5 = (1 << i);
+        if(flag_0to7 == condition_5) {
+            for(int j = 8; j < 12; ++j) {
+                int condition_6 = (1 << j);
+                if(flag_8to11 == condition_6){
+                    flag_33 = 1;
+                }
+                // bit同士が同一方向の場合は三三禁ではない
+                switch (j){
+                    case 8:
+                        if(i == 0 || i == 1)    flag_33 = 0;
+                        break;
+                    case 9:
+                        if(i == 2 || i == 3)    flag_33 = 0;
+                        break;
+                    case 10:
+                        if(i == 4 || i == 5)    flag_33 = 0;
+                        break;
+                    case 11:
+                        if(i == 6 || i == 7)    flag_33 = 0;
+                        break;
+                    default:
+                        break;
+                }
+                break;
+            }
+        }
+    } 
+
+    if(flag_33) return 1;
+    else    return 0;
 }
 
-int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
+
+int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int *place_flag_send){
 
     /*
      * 四四禁は - | \ / の4種類の重複組み合わせ10通り間で成立する
@@ -201,20 +315,15 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      *  board - 現在の盤面の状態
      */
 
-    int flag_44 = 0;
-    int judge_x_o = board[x][y];    // 今回判定する石の種類
-
-    // フラグをビット演算する
+    // 四四禁フラグ用の、方向を表すbit
     enum {
-        HORIZONTAL,         // 0
-        VERTICAL,           // 1
-        DIAGONALLY_LEFT,    // 2
-        DIAGONALLY_RIGHT    // 3
+        HORIZONTAL,             // 0
+        VERTICAL,               // 1
+        DIAGONALLY_LEFT_2,      // 2
+        DIAGONALLY_RIGHT_2      // 3
     };
 
-    int flag = 0b0000;  // 4bitでbitごとに上記4つのフラグを管理
-
-    // 同一方向内の石の配置フラグ用
+    // 四四禁の、同一方向内の石の配置フラグ用
     enum {
         ooxoo,    // 0
         oxooo,    // 1
@@ -223,7 +332,11 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         oooox     // 4
     };
 
-    int place_flag = 0b00000;  // 5bitでbitごとに「同一方向内の石の配置フラグ」を管理
+    int flag_44 = 0;
+    int judge_x_o = board[x][y];    // 今回判定する石の種類
+    int flag_init = 0b00000;        // アドレス代入用
+    *flag = 0b0000;  // 4bitでbitごとに上記4つのフラグを管理
+    int *place_flag = &flag_init;  // 5bitでbitごとに「同一方向内の石の配置フラグ」を管理
 
     // ============= 水平方向の判定 ==================================
     int cnt_horizontal = 0;
@@ -232,211 +345,302 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 3)     place_flag |= 1 << ooxoo;
+    if(cnt_horizontal == 4)     *place_flag |= 1 << ooxoo;
     cnt_horizontal = 0;
     if((x+3)<BOARD_SQUARE && (x-1)>=0){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 3)     place_flag |= 1 << oxooo;    
+    if(cnt_horizontal == 4)     *place_flag |= 1 << oxooo;    
     cnt_horizontal = 0;
     if((x+1)<BOARD_SQUARE && (x-3)>=0){     // ・・・＋・
-        for(int i=-1; i<4; i++){
+        for(int i=-3; i<2; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 3)     place_flag |= 1 << oooxo;  
+    if(cnt_horizontal == 4)     *place_flag |= 1 << oooxo;  
     cnt_horizontal = 0;
     if((x+4)<BOARD_SQUARE){     // ＋・・・・
         for(int i=0; i<5; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 3)     place_flag |= 1 << xoooo; 
+    if(cnt_horizontal == 4)     *place_flag |= 1 << xoooo; 
     cnt_horizontal = 0;
     if((x-4)>=0){               // ・・・・＋
         for(int i=-4; i<1; i++){
             if(board[x+i][y] == judge_x_o)  cnt_horizontal++;
         }
     }
-    if(cnt_horizontal == 3)     place_flag |= 1 << oooox;
+    if(cnt_horizontal == 4)     *place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
             int condition = (1 << i) | (1 << j);
-            if (place_flag == condition){
+            if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                    break;
+                default:
+                    break;
+            }            
         }
-        if(place_flag == (1 << i)){
-            flag |= 1 << HORIZONTAL;
+        if(*place_flag == (1 << i)){
+            *flag |= 1 << HORIZONTAL;
         }
     }
 
+    // judge_kinzite関数用にフラグを格納
+    if(*place_flag != 0){
+        *place_flag_send = *place_flag;
+    }
+
     // ============= 垂直方向の判定 ==================================
-    place_flag = 0b00000;
+    flag_init = 0b00000;
+    place_flag = &flag_init;
     int cnt_vertical = 0;
     if((y+2)<BOARD_SQUARE && (y-2)>=0){     // ・・＋・・
         for(int i=-2; i<3; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 3)     place_flag |= 1 << ooxoo;
+    if(cnt_vertical == 4)     *place_flag |= 1 << ooxoo;
     cnt_vertical = 0;
     if((y+3)<BOARD_SQUARE && (y-1)>=0){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 3)     place_flag |= 1 << oxooo;    
+    if(cnt_vertical == 4)     *place_flag |= 1 << oxooo;    
+
     cnt_vertical = 0;
     if((y+1)<BOARD_SQUARE && (y-3)>=0){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 3)     place_flag |= 1 << oooxo;  
+    if(cnt_vertical == 4)     *place_flag |= 1 << oooxo;  
     cnt_vertical = 0;
     if((y+4)<BOARD_SQUARE){     // ＋・・・・
         for(int i=0; i<5; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 3)     place_flag |= 1 << xoooo; 
+    if(cnt_vertical == 4)     *place_flag |= 1 << xoooo; 
     cnt_vertical = 0;
     if((y-4)>=0){               // ・・・・＋
         for(int i=-4; i<1; i++){
             if(board[x][y+i] == judge_x_o)  cnt_vertical++;
         }
     }
-    if(cnt_vertical == 3)     place_flag |= 1 << oooox;
+    if(cnt_vertical == 4)     *place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
             int condition = (1 << i) | (1 << j);
-            if (place_flag == condition){
+            if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                    break;
+                default:
+                    break;
+            }  
         }
-        if(place_flag == (1 << i)){
-            flag |= 1 << VERTICAL;
+        if(*place_flag == (1 << i)){
+            *flag |= 1 << VERTICAL;
         }
     }
 
+    // judge_kinzite関数用にフラグを格納
+    if(*place_flag != 0){
+        *place_flag_send = *place_flag;
+    }
+
     // ============= 左斜め方向の判定 ==================================
-    place_flag = 0b00000;
+    flag_init = 0b00000;
+    place_flag = &flag_init;
     int cnt_diagonally_left = 0;    
     if((x-2)>=0 && (y-2)>=0 && (x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE){     // ・・＋・・
         for(int i=-2; i<3; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 3)     place_flag |= 1 << ooxoo;
+    if(cnt_diagonally_left == 4)     *place_flag |= 1 << ooxoo;
     cnt_diagonally_left = 0;
     if((x-1)>=0 && (y-1)>=0 && (x+3)<BOARD_SQUARE && (y+3)<BOARD_SQUARE){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 3)     place_flag |= 1 << oxooo;    
+    if(cnt_diagonally_left == 4)     *place_flag |= 1 << oxooo;    
     cnt_diagonally_left = 0;
     if((x-3)>=0 && (y-3)>=0 && (x+1)<BOARD_SQUARE && (y+1)<BOARD_SQUARE){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 3)     place_flag |= 1 << oooxo;  
+    if(cnt_diagonally_left == 4)     *place_flag |= 1 << oooxo;  
     cnt_diagonally_left = 0;
     if((x+4)<BOARD_SQUARE && (y+4)<BOARD_SQUARE){     // ＋・・・・
         for(int i=0; i<5; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 3)     place_flag |= 1 << xoooo; 
+    if(cnt_diagonally_left == 4)     *place_flag |= 1 << xoooo; 
     cnt_diagonally_left = 0;
     if((x-4)>=0 && (y-4)>=0){               // ・・・・＋
         for(int i=-4; i<1; i++){
             if(board[x+i][y+i] == judge_x_o)  cnt_diagonally_left++;
         }
     }
-    if(cnt_diagonally_left == 3)     place_flag |= 1 << oooox;
+    if(cnt_diagonally_left == 4)     *place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
             int condition = (1 << i) | (1 << j);
-            if (place_flag == condition){
+            if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                    break;
+                default:
+                    break;
+            }  
         }
-        if(place_flag == (1 << i)){
-            flag |= 1 << DIAGONALLY_LEFT;
+        if(*place_flag == (1 << i)){
+            *flag |= 1 << DIAGONALLY_LEFT_2;
         }
     }
 
+    // judge_kinzite関数用にフラグを格納
+    if(*place_flag != 0){
+        *place_flag_send = *place_flag;
+    }
+
     // ============= 右斜め方向の判定 ==================================
-    place_flag = 0b00000;
+    flag_init = 0b00000;
+    place_flag = &flag_init;
     int cnt_diagonally_right = 0;    
     if((x+2)<BOARD_SQUARE && (y-2)>=0 && (x-2)>=0 && (y+2)<BOARD_SQUARE){     // ・・＋・・
         for(int i=-2; i<3; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 3)     place_flag |= 1 << ooxoo;
+    if(cnt_diagonally_right == 4)     *place_flag |= 1 << ooxoo;
     cnt_diagonally_right = 0;
     if((x+3)<BOARD_SQUARE && (y-3)>=0 && (x-1)>=0 && (y+1)<BOARD_SQUARE){     // ・＋・・・
         for(int i=-1; i<4; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 3)     place_flag |= 1 << oxooo;    
+    if(cnt_diagonally_right == 4)     *place_flag |= 1 << oxooo;    
     cnt_diagonally_right = 0;
     if((x-1)>=0 && (y+1)<BOARD_SQUARE && (x+3)<BOARD_SQUARE && (y-1)>=0){     // ・・・＋・
         for(int i=-3; i<2; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 3)     place_flag |= 1 << oooxo;  
+    if(cnt_diagonally_right == 4)     *place_flag |= 1 << oooxo;  
     cnt_diagonally_right = 0;
     if((x+4)<BOARD_SQUARE && (y-4)>=0){     // ＋・・・・
         for(int i=0; i<5; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 3)     place_flag |= 1 << xoooo; 
+    if(cnt_diagonally_right == 4)     *place_flag |= 1 << xoooo; 
     cnt_diagonally_right = 0;
     if((x-4)>=0 && (y+4)<BOARD_SQUARE){               // ・・・・＋
         for(int i=-4; i<1; i++){
             if(board[x+i][y-i] == judge_x_o)  cnt_diagonally_right++;
         }
     }
-    if(cnt_diagonally_right == 3)     place_flag |= 1 << oooox;
+    if(cnt_diagonally_right == 4)     *place_flag |= 1 << oooox;
 
     for (int i = 0; i < 5; ++i) {
         for (int j = i + 1; j < 5; ++j) {
             int condition = (1 << i) | (1 << j);
-            if (place_flag == condition){
+            if (*place_flag == condition){
                 flag_44 = 1;
             }
+            // 4連を四四禁とするのを防ぐ
+            switch (j){
+                case 1:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 2:
+                    if(i == ooxoo)    flag_44 = 0;
+                    break;
+                case 3:
+                    if(i == oxooo)    flag_44 = 0;
+                    break;
+                case 4:
+                    if(i == oooxo)    flag_44 = 0;
+                    break;
+                default:
+                    break;
+            }  
         }
-        if(place_flag == (1 << i)){
-            flag |= 1 << DIAGONALLY_RIGHT;
+        if(*place_flag == (1 << i)){
+            *flag |= 1 << DIAGONALLY_RIGHT_2;
         }
+    }
+    
+    // judge_kinzite関数用にフラグを格納
+    if(*place_flag != 0){
+        *place_flag_send = *place_flag;
     }
 
     // - | / \ の二つが組み合わさると四四禁
     for (int i = 0; i < 4; ++i) {
         for (int j = i + 1; j < 4; ++j) {
             int condition = (1 << i) | (1 << j);
-            if(flag == condition){
+            if(*flag == condition){
                 flag_44 = 1;
             }
         }
     }
 
-    if(flag_44){
-        printf("四四禁です、ゲーム終了");        
-    }
+    if(flag_44) return 1; 
+    else    return 0;
 
 }
 
@@ -468,8 +672,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x][y+1] == judge_x_o && (y+1) < BOARD_SQUARE)
                 && (vertical_upper_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(上)");
-            return 1;
         }
     }
     else if(board[x][y-3] == judge_x_o && (y-3) >= 0){   // 「2連-3連」の長連を判定
@@ -485,8 +687,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (y+2) < BOARD_SQUARE
                 && (vertical_upper_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(上)");
-            return 1;
         }
     }
 
@@ -503,8 +703,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x][y-1] == judge_x_o && (y-1) >= 0)
                 && (vertical_lower_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(下)");
-            return 1;
         }
     }
     else if(board[x][y+3] == judge_x_o && (y+3) < BOARD_SQUARE){   // 「2連-3連」の長連を判定
@@ -520,8 +718,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (y-2) >= 0
                 && (vertical_lower_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(下)");
-            return 1;
         }
     }
 
@@ -539,8 +735,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x-1][y] == judge_x_o && (x-1) >= 0)
                 && (horizontal_right_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(右)");
-            return 1;
         }
     }
     else if(board[x+3][y] == judge_x_o && (x+3) < BOARD_SQUARE){   // 「2連-3連」の長連を判定
@@ -556,8 +750,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (x-2) >= 0
                 && (horizontal_right_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(右)");
-            return 1;
         }
     }
 
@@ -574,8 +766,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x+1][y] == judge_x_o && (x+1) < BOARD_SQUARE)
                 && (horizontal_left_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(左)");
-            return 1;
         }
     }
     else if(board[x-3][y] == judge_x_o && (x-3) >= 0){   // 「2連-3連」の長連を判定
@@ -591,8 +781,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (x+2) < BOARD_SQUARE
                 && (horizontal_left_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(左)");
-            return 1;
         }
     }
 
@@ -648,8 +836,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     }
     if(diagonal_right_upper_exists == 1 || diagonal_left_lower_exists == 1){
         chouren_flag = 1;
-        printf("長連です, ゲーム終了(斜め/)");
-        return 1;
     }
 
     // 次に \ 方向を判定する
@@ -701,8 +887,9 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     }
     if(diagonal_left_upper_exists == 1 || diagonal_right_lower_exists == 1){
         chouren_flag = 1;
-        printf("長連です, ゲーム終了(斜め\\)");
-        return 1;
-    }    
+    }
+
+    if(chouren_flag)    return 1;
+    else    return 0;
 
 }
