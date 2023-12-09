@@ -5,43 +5,12 @@
 #include <stdlib.h>
 #include "./judge.h"
 
-// 三三禁フラグ用の、方向を表すbit
-enum {
-    LEFT,               // 0
-    RIGHT,              // 1
-    LOWER,              // 2
-    UPPER,              // 3
-    RIGHT_LOWER,        // 4
-    LEFT_UPPER,         // 5
-    RIGHT_UPPER,        // 6
-    LEFT_LOWER,         // 7
-    HORIZONTAL_MID,     // 8
-    VERTICAL_MID,       // 9
-    DIAGONALLY_LEFT,    // 10
-    DIAGONALLY_RIGHT    // 11
-};
-
-// 四四禁フラグ用の、方向を表すbit
-enum {
-    HORIZONTAL,             // 0
-    VERTICAL,               // 1
-    DIAGONALLY_LEFT_2,      // 2
-    DIAGONALLY_RIGHT_2      // 3
-};
-
-// 四四禁の、同一方向内の石の配置フラグ用
-enum {
-    ooxoo,    // 0
-    oxooo,    // 1
-    oooxo,    // 2
-    xoooo,    // 3
-    oooox     // 4
-};
 
 int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
    
     judge_33(x, y, board);
 
+    // TODO: judge_44()の不要な引数(flag, flag_direction)を消す
     int flag, flag_direction;
     flag = 0;
     flag_direction = 0;
@@ -60,6 +29,22 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      *  y - 石を置くy座標
      *  board - 現在の盤面の状態
      */
+
+    // 三三禁フラグ用の、方向を表すbit
+    enum {
+        LEFT,               // 0
+        RIGHT,              // 1
+        LOWER,              // 2
+        UPPER,              // 3
+        RIGHT_LOWER,        // 4
+        LEFT_UPPER,         // 5
+        RIGHT_UPPER,        // 6
+        LEFT_LOWER,         // 7
+        HORIZONTAL_MID,     // 8
+        VERTICAL_MID,       // 9
+        DIAGONALLY_LEFT,    // 10
+        DIAGONALLY_RIGHT    // 11
+    };
 
     int flag_33 = 0;
     int judge_x_o = board[x][y];    // 今回判定する石の種類
@@ -198,7 +183,7 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      */
 
     int flag_tmp = flag;
-    int flag_return = flag;
+    //int flag_return = flag;   // フラグを返り値にする場合の変数宣言
     int flag_0to7 = (flag &= 0b000011111111);
     int flag_8to11 = (flag_tmp &= 0b111100000000);
     for(int i = 0; i < 8; ++i) {
@@ -307,10 +292,10 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     } 
 
     if(flag_33){
-        printf("三三禁です、ゲーム終了");
+        printf(",forbidden (三三禁)");
+        return 1;
     }
-
-    return flag_return;
+    else    return 0;
 }
 
 
@@ -324,6 +309,23 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
      *  y - 石を置くy座標
      *  board - 現在の盤面の状態
      */
+
+    // 四四禁フラグ用の、方向を表すbit
+    enum {
+        HORIZONTAL,             // 0
+        VERTICAL,               // 1
+        DIAGONALLY_LEFT_2,      // 2
+        DIAGONALLY_RIGHT_2      // 3
+    };
+
+    // 四四禁の、同一方向内の石の配置フラグ用
+    enum {
+        ooxoo,    // 0
+        oxooo,    // 1
+        oooxo,    // 2
+        xoooo,    // 3
+        oooox     // 4
+    };
 
     int flag_44 = 0;
     int judge_x_o = board[x][y];    // 今回判定する石の種類
@@ -631,10 +633,10 @@ int judge_44(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], int *flag, int
     }
 
     if(flag_44){
-        printf("四四禁です、ゲーム終了");        
+        printf(",forbidden (四四禁)\n");
+        return 1; 
     }
-
-    return 0;
+    else    return 0;
 
 }
 
@@ -666,8 +668,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x][y+1] == judge_x_o && (y+1) < BOARD_SQUARE)
                 && (vertical_upper_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(上)");
-            return 1;
         }
     }
     else if(board[x][y-3] == judge_x_o && (y-3) >= 0){   // 「2連-3連」の長連を判定
@@ -683,8 +683,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (y+2) < BOARD_SQUARE
                 && (vertical_upper_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(上)");
-            return 1;
         }
     }
 
@@ -701,8 +699,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x][y-1] == judge_x_o && (y-1) >= 0)
                 && (vertical_lower_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(下)");
-            return 1;
         }
     }
     else if(board[x][y+3] == judge_x_o && (y+3) < BOARD_SQUARE){   // 「2連-3連」の長連を判定
@@ -718,8 +714,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (y-2) >= 0
                 && (vertical_lower_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(下)");
-            return 1;
         }
     }
 
@@ -737,8 +731,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x-1][y] == judge_x_o && (x-1) >= 0)
                 && (horizontal_right_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(右)");
-            return 1;
         }
     }
     else if(board[x+3][y] == judge_x_o && (x+3) < BOARD_SQUARE){   // 「2連-3連」の長連を判定
@@ -754,8 +746,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (x-2) >= 0
                 && (horizontal_right_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(右)");
-            return 1;
         }
     }
 
@@ -772,8 +762,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         if((board[x+1][y] == judge_x_o && (x+1) < BOARD_SQUARE)
                 && (horizontal_left_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(左)");
-            return 1;
         }
     }
     else if(board[x-3][y] == judge_x_o && (x-3) >= 0){   // 「2連-3連」の長連を判定
@@ -789,8 +777,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 && (x+2) < BOARD_SQUARE
                 && (horizontal_left_exists == 1)){
             chouren_flag = 1;
-            printf("長連です, ゲーム終了(左)");
-            return 1;
         }
     }
 
@@ -846,8 +832,6 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     }
     if(diagonal_right_upper_exists == 1 || diagonal_left_lower_exists == 1){
         chouren_flag = 1;
-        printf("長連です, ゲーム終了(斜め/)");
-        return 1;
     }
 
     // 次に \ 方向を判定する
@@ -899,8 +883,12 @@ int judge_chouren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     }
     if(diagonal_left_upper_exists == 1 || diagonal_right_lower_exists == 1){
         chouren_flag = 1;
-        printf("長連です, ゲーム終了(斜め\\)");
+    }
+
+    if(chouren_flag){
+        printf(",forbidden (長連)\n");
         return 1;
-    }    
+    }
+    else    return 0;
 
 }
