@@ -73,28 +73,34 @@ int main(void) {
             if(x>0 && y>0) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-            judge_kinzite(x-1, y-1, board);
+            judge_kinzite(x-1, y-1, board, message);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
 
-        // 五目並べの石を置く座標をユーザーに入力
-        memset(&str, '\0', sizeof(str));
-        printf("どこに置きますか？: ");
-        scanf("%s", message);
+        // 禁じ手となる手を置くことを防ぐdo-while
+        int isKinzite = 0;
+        do{
+            // 五目並べの石を置く座標をユーザーに入力
+            memset(&str, '\0', sizeof(str));
+            printf("どこに置きますか？: ");
+            scanf("%s", message);
 
-        /* -----追加部分----- */
-        strcpy(str, message);
-        token=strtok(str,",");
-        x = atoi(token);
-        token=strtok(NULL, ",");
-        y = atoi(token);
-        if(x>0 && y>0) board[x-1][y-1] = 1;
+            strcpy(str, message);
+            token=strtok(str,",");
+            x = atoi(token);
+            token=strtok(NULL, ",");
+            y = atoi(token);
+            if(x>0 && y>0 && x<=BOARD_SQUARE && y<=BOARD_SQUARE) board[x-1][y-1] = 1;
 
-        // 自分の手の禁じ手を確認
-        judge_kinzite(x-1, y-1, board);
-        win(board, x, y, message);
-        /* -----ここまで----- */
+            // 自分の手の禁じ手を確認
+            isKinzite = judge_kinzite(x-1, y-1, board, message);
+            if(isKinzite == 1){
+                // 禁じ手の場合、盤面を元の状態に戻す
+                board[x-1][y-1] = 0;
+            }
+            else    win(board, x, y, message);
+        }while(isKinzite == 1);
 
         // サーバにデータを送信
         send(s, message, strlen(message), 0);
