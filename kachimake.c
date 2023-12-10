@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "kachimake.h"
+#include "./kachimake.h"
 
 void win(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, char *message)
 {

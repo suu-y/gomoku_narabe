@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 #include "./defense.h"
 
 enum {
@@ -52,7 +53,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     if(cnt==3)
                     {
                         // 置く場所を決める
-                        /* !!!!!未実装!!!!! */
+                        defense3ren(board, j, i, p, 0);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -77,7 +78,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     if(cnt==3)
                     {
                         // 置く場所を決める
-                        /* !!!!!未実装!!!!! */
+                        defense3ren(board, j, i, p, 1);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -102,7 +103,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     if(cnt==3)
                     {
                         // 置く場所を決める
-                        /* !!!!!未実装!!!!! */
+                        defense3ren(board, j, i, p, 2);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -120,7 +121,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     }
                 }
 
-                // 左上に相手のコマがないので，そのまま調べる
+                // 右上に相手のコマがないので，そのまま調べる
                 if((flag&0b1000)==0b0000)
                 {
                     cnt = countDiagonallyLowerLeft(board, j,i);
@@ -128,7 +129,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     if(cnt==3)
                     {
                         // 置く場所を決める
-                        /* !!!!!未実装!!!!! */
+                        defense3ren(board, j, i, p, 3);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -181,4 +182,74 @@ int countDiagonallyLowerLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y
     int cnt = 1;
     while(--x>=0 && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
+}
+
+/* 3つ連続で並んでいた時に，それを防ぐための関数
+ * どの方向に並んでいたとしても，盤は中央から外側に向かって展開していくことが多いと予測できるため，より中央に近い場所に置くようにする
+ * x,y  : 相手の並び方を確認した座標の位置(そこから右or下or右下or左下に3つ並んでいる状態)
+ * p    : 座標を格納する構造体へのポインタ
+ * mode : 右，下，右下，左下どちらの方向に並んでいるかを制御する．
+ *        0:右方向，1:下方向，2:右下方向，3:左下方向とする 
+ */
+void defense3ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode)
+{
+    int dist1=-1, dist2=-1;
+    switch(mode)
+    {
+        case 0: // 右方向に3つ
+            // 今の場所から1つ左●○(<-x,y)○○か，3つ右(x,y->)○○○●に置くことになる
+            if(x-1>=0 && board[x-1][y]==0) dist1=calculateDistance(x-1, y);
+            if(x+3<BOARD_SQUARE && board[x+3][y]==0) dist2=calculateDistance(x+3, y);
+            if(dist1<=dist2) // 1つ左の方が中心に近い
+            {
+                p->x=x-1; p->y=y;
+            } else {
+                p->x=x+3; p->y=y;
+            }
+            break;
+
+        case 1: // 下方向に3つ
+            // 今の場所から1つ上●○(<-x,y)○○か，3つ下(x,y->)○○○●に置くことになる
+            if(y-1>=0 && board[x][y-1]==0) dist1=calculateDistance(x, y-1);
+            if(y+3<BOARD_SQUARE && board[x][y+3]==0) dist2=calculateDistance(x, y+3);
+            if(dist1<=dist2) // 1つ上の方が中心に近い
+            {
+                p->x=x; p->y=y-1;
+            } else {
+                p->x=x; p->y=y+3;
+            }
+            break;
+
+        case 2: // 右下に3つ
+            // 今の場所から1つ左上●○(<-x,y)○○か，3つ右下(x,y->)○○○●に置くことになる
+            if(x-1>=0 && y-1>=0 && board[x-1][y-1]==0) dist1=calculateDistance(x-1, y-1);
+            if(x+3<BOARD_SQUARE && y+3<BOARD_SQUARE && board[x+3][y+3]==0) dist2=calculateDistance(x+3, y+3);
+            if(dist1<=dist2) // 1つ左上の方が中心に近い
+            {
+                p->x=x-1; p->y=y-1;
+            } else {
+                p->x=x+3; p->y=y+3;
+            }
+            break;
+
+        case 3: // 左下に3つ
+            // 今の場所から1つ右上○○○(<-x,y)●か3つ左下●○○(x,y->)○に置くことになる
+            if(x+1<BOARD_SQUARE && y-1>=0 && board[x+1][y-1]==0) dist1=calculateDistance(x+1, y-1);
+            if(x-3>=0 && y+3<BOARD_SQUARE && board[x-3][y+3]==0) dist2=calculateDistance(x-3, y+3);
+            if(dist1<=dist2) // 1つ右上の方が中心に近い
+            {
+                p->x=x+1; p->y=y-1;
+            } else {
+                p->x=x-3; p->y=y+3;
+            }
+            break;
+    }
+}
+
+/* 在る座標(x,y)から中心の座標(BOARD_SQUARE/2, BOARD_SQUARE/2)までの距離を計算．
+ * ユークリッド距離を用いると2乗計算，平方計算等が必要になってしまうため，マンハッタン距離で計算を行う
+ */
+int calculateDistance(int x, int y)
+{
+    return abs(x-BOARD_SQUARE/2)+abs(y-BOARD_SQUARE/2);
 }
