@@ -16,7 +16,6 @@ enum {
  */
 int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
 {
-    int rslt = 1;
     int flag = 0b0000; // 左、上、左上、右上にコマが存在するかを管理する．
     // 左上から順に走査していき、相手の碁が何個並ぶかを判定
     // 仮に3個並んでる or 飛び三の場合には守るべきだと仮定
@@ -45,84 +44,141 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 if(j>0 && i>0 && board[j-1][i-1]==2) flag |= 1 << LEFT_UPPER; // 左上に相手のコマ
                 if(j<BOARD_SQUARE-1 && i>0 && board[j+1][i-1]==2) flag |= 1 << RIGHT_UPPER; // 右上に相手のコマ
             
-            // 左方向にコマがないのでそのまま調べていく
-            if((flag&0b0001)==0b0000)
-            {
-                cnt += countWidth(j,i);
-                // 3個の場合，守りに徹するので結果を返す
-                if(cnt==3)
+                // 左方向にコマがないのでそのまま調べていく
+                if((flag&0b0001)==0b0000)
                 {
-                    // 置く場所を決める
-                    /* !!!!!未実装!!!!! */
-                    return 0;
-                }
-                // 2個の場合，飛び三の場合を考える
-                else if(cnt == 2)
-                {
-                    // j, iの位置から右に並んでいる、すなわちboard[j][i]とboard[j+1][i]に在る状態
-                    // したがって、飛び三の場合はboard[j-2][i]の時かboard[j+3][i]の時
-                    if((j-2>=0 && board[j-2][i]==2) || (j+3<BOARD_SQUARE && board[j+3][i]==2))
+                    cnt = countWidth(board, j,i);
+                    // 3個の場合，守りに徹するので結果を返す
+                    if(cnt==3)
                     {
                         // 置く場所を決める
                         /* !!!!!未実装!!!!! */
                         return 0;
                     }
+                    // 2個の場合，飛び三の場合を考える
+                    else if(cnt == 2)
+                    {
+                        // j, iの位置から右に並んでいる、すなわちboard[j][i]とboard[j+1][i]に在る状態
+                        // したがって、飛び三の場合はboard[j-2][i]の時かboard[j+3][i]の時
+                        if((j-2>=0 && board[j-2][i]==2) || (j+3<BOARD_SQUARE && board[j+3][i]==2))
+                        {
+                            // 置く場所を決める
+                            /* !!!!!未実装!!!!! */
+                            return 0;
+                        }
+                    }
                 }
-            }
 
-            // 上方向にコマが無いので，そのまま調べる
-            if((flag&0b0010)==0b0000)
-            {
-                cnt += countVertical(j,i);
-                // 3個の場合，守りに徹するので結果を返す
-                if(cnt==3)
+                // 上方向にコマが無いので，そのまま調べる
+                if((flag&0b0010)==0b0000)
                 {
-                    // 置く場所を決める
-                    /* !!!!!未実装!!!!! */
-                    return 0;
-                }
-                // 2個の場合，飛び三の場合を考える
-                else if(cnt == 2)
-                {
-                    // j, iの位置から下に並んでいる、すなわちboard[j][i]とboard[j][i+1]に在る状態
-                    // したがって、飛び三の場合はboard[j][i-2]の時かboard[j][i+3]の時
-                    if((i-2>=0 && board[j][i-2]==2) || (i+3<BOARD_SQUARE && board[j][i+3]==2))
+                    cnt = countVertical(board, j,i);
+                    // 3個の場合，守りに徹するので結果を返す
+                    if(cnt==3)
                     {
                         // 置く場所を決める
                         /* !!!!!未実装!!!!! */
                         return 0;
                     }
+                    // 2個の場合，飛び三の場合を考える
+                    else if(cnt == 2)
+                    {
+                        // j, iの位置から下に並んでいる、すなわちboard[j][i]とboard[j][i+1]に在る状態
+                        // したがって、飛び三の場合はboard[j][i-2]の時かboard[j][i+3]の時
+                        if((i-2>=0 && board[j][i-2]==2) || (i+3<BOARD_SQUARE && board[j][i+3]==2))
+                        {
+                            // 置く場所を決める
+                            /* !!!!!未実装!!!!! */
+                            return 0;
+                        }
+                    }
                 }
-            }
 
-            if((flag&0b0100)==0b0000) countDiagonallyLowerRight(j,i);
-            if((flag&0b1000)==0b0000) countDiagonallyLowerLeft(j,i);
+                // 左上方向に相手のコマがないので，そのまま調べる
+                if((flag&0b0100)==0b0000)
+                {
+                    cnt = countDiagonallyLowerRight(board, j,i);
+                    // 3個の場合，守りに徹するので結果を返す
+                    if(cnt==3)
+                    {
+                        // 置く場所を決める
+                        /* !!!!!未実装!!!!! */
+                        return 0;
+                    }
+                    // 2個の場合，飛び三の場合を考える
+                    else if(cnt == 2)
+                    {
+                        // j, iの位置から右下に並んでいる、すなわちboard[j][i]とboard[j+1][i+1]に在る状態
+                        // したがって、飛び三の場合はboard[j-2][i-2]の時かboard[j+3][i+3]の時
+                        if((j-2>=0 && i-2>=0 && board[j-2][i-2]==2) || (
+                            j+3<BOARD_SQUARE && i+3<BOARD_SQUARE && board[j+3][i+3]==2))
+                        {
+                            // 置く場所を決める
+                            /* !!!!!未実装!!!!! */
+                            return 0;
+                        }
+                    }
+                }
 
+                // 左上に相手のコマがないので，そのまま調べる
+                if((flag&0b1000)==0b0000)
+                {
+                    cnt = countDiagonallyLowerLeft(board, j,i);
+                    // 3個の場合，守りに徹するので結果を返す
+                    if(cnt==3)
+                    {
+                        // 置く場所を決める
+                        /* !!!!!未実装!!!!! */
+                        return 0;
+                    }
+                    // 2個の場合，飛び三の場合を考える
+                    else if(cnt == 2)
+                    {
+                        // j, iの位置から左下に並んでいる、すなわちboard[j][i]とboard[j-1][i+1]に在る状態
+                        // したがって、飛び三の場合はboard[j+2][i-2]の時かboard[j-3][i+3]の時
+                        if((j+2<BOARD_SQUARE && i-2>=0 && board[j+2][i-2]==2) || (
+                            j-3>=0 && i+3<BOARD_SQUARE && board[j-3][i+3]==2))
+                        {
+                            // 置く場所を決める
+                            /* !!!!!未実装!!!!! */
+                            return 0;
+                        }
+                    }
+                }
             }
         }
     }
+    return 1;
 }
 
-/* 横に自分を含めて何個並ぶか確認 */
-int countWidth(int x, int y)
+/* (右方向)横に自分を含めて相手のコマが何個並ぶか確認 */
+int countWidth(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-
+    int cnt = 1;
+    while(++x<BOARD_SQUARE && board[x][y]==2) cnt++;
+    return cnt;
 }
 
-/* 縦に自分を含めて何個並ぶか確認 */
-int countVertical(int x, int y)
+/* (下方向)縦に自分を含めて相手のコマが何個並ぶか確認 */
+int countVertical(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-
+    int cnt = 1;
+    while(++y<BOARD_SQUARE && board[x][y]==2) cnt++;
+    return cnt;
 }
 
-/* 右斜め下に自分を含めて何個並ぶか確認 */
-int countDiagonallyLowerRight(int x, int y)
+/* 右斜め下に自分を含めて相手のコマが何個並ぶか確認 */
+int countDiagonallyLowerRight(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-
+    int cnt = 1;
+    while(++x<BOARD_SQUARE && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
+    return cnt;
 }
 
 /* 左斜め下に自分を含めて何個並ぶか確認*/
-int countDiagonallyLowerLeft(int x, int y)
+int countDiagonallyLowerLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    
+    int cnt = 1;
+    while(--x>=0 && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
+    return cnt;
 }
