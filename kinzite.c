@@ -8,23 +8,26 @@
 
 int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], char *message){
    
-    if(judge_33(x, y, board)){
-        printf(",forbidden (三三禁)");
-        strcat(message, ",forbidden (三三禁)");
-    }
-
     int flag, flag_direction;
     flag = 0;
     flag_direction = 0;
-    if(judge_44(x, y, board, &flag, &flag_direction)){
+
+    if(judge_33(x, y, board)){
+        printf(",forbidden (三三禁)");
+        strcat(message, ",forbidden (三三禁)");
+        return 1;
+    }
+    else if(judge_44(x, y, board, &flag, &flag_direction)){
         printf(",forbidden (四四禁)\n");
         strcat(message, ",forbidden (四四禁)");
+        return 1;
     }
-
-    if(judge_chouren(x, y, board)){
+    else if(judge_chouren(x, y, board)){
         printf(",forbidden (長連)\n");
-        strcat(message, ",forbidden (長連)");      
+        strcat(message, ",forbidden (長連)");
+        return 1;   
     }
+    else    return 0;
 }
 
 int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
