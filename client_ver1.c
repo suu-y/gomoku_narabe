@@ -73,7 +73,7 @@ int main(void) {
             if(x>0 && y>0) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-            judge_kinzite(x-1, y-1, board);
+            judge_kinzite(x-1, y-1, board, message);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
@@ -92,7 +92,7 @@ int main(void) {
         if(x>0 && y>0) board[x-1][y-1] = 1;
 
         // 自分の手の禁じ手を確認
-        judge_kinzite(x-1, y-1, board);
+        judge_kinzite(x-1, y-1, board, message);
         win(board, x, y, message);
         /* -----ここまで----- */
 
