@@ -212,22 +212,23 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                     if(flag_8to11 == condition_1){
                         switch(h){
                             case 8:
-                                if(i==LEFT || i==RIGHT){
+                                if(i==LEFT || i==RIGHT || j==LEFT || j==RIGHT){
                                     flag_33 = 0;
                                 } break;
                             case 9:
-                                if(i==LOWER || i==UPPER){
+                                if(i==LOWER || i==UPPER || j==LOWER || j==UPPER){
                                     flag_33 = 0;
                                 } break;
                             case 10:
-                                if(i==RIGHT_LOWER || i==LEFT_UPPER){
+                                if(i==RIGHT_LOWER || i==LEFT_UPPER || j==RIGHT_LOWER || j==LEFT_UPPER){
                                     flag_33 = 0;
                                 } break;
                             case 11:
-                                if(i==RIGHT_UPPER || i==LEFT_LOWER){
+                                if(i==RIGHT_UPPER || i==LEFT_LOWER || j==RIGHT_UPPER || j==LEFT_LOWER){
                                     flag_33 = 0;
                                 } break;
                         }
+                        break;
                     }
                 }
             }
@@ -246,32 +247,33 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         switch(h){
                             case 0:
                             case 1:
-                                if(i==HORIZONTAL_MID){
+                                if(i==HORIZONTAL_MID || j==HORIZONTAL_MID){
                                     flag_33 = 0;
                                 } break;
                             case 2:
                             case 3:
-                                if(i==VERTICAL_MID){
+                                if(i==VERTICAL_MID || j==VERTICAL_MID){
                                     flag_33 = 0;
                                 } break;
                             case 4:
                             case 5:
-                                if(i==DIAGONALLY_LEFT){
+                                if(i==DIAGONALLY_LEFT || j==DIAGONALLY_LEFT){
                                     flag_33 = 0;
                                 } break;
                             case 6:
                             case 7:
-                                if(i==DIAGONALLY_RIGHT){
+                                if(i==DIAGONALLY_RIGHT || j==DIAGONALLY_RIGHT){
                                     flag_33 = 0;
                                 } break;
                         }
+                        break;
                     }
                 }
             }
         }
     }
 
-    // 0-7bit, 8-11bit間で1bitずつ立つ
+    // 0-7bit, 8-11bit間で1bitずつ立つ（このとき計2bitしか立っていない）
     for(int i = 0; i < 8; ++i) {
         int condition_5 = (1 << i);
         if(flag_0to7 == condition_5) {
@@ -279,25 +281,24 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                 int condition_6 = (1 << j);
                 if(flag_8to11 == condition_6){
                     flag_33 = 1;
+
+                    // bit同士が同一方向の場合は三三禁ではない
+                    switch (j){
+                        case 8:
+                            if(i == 0 || i == 1)    flag_33 = 0;
+                            break;
+                        case 9:
+                            if(i == 2 || i == 3)    flag_33 = 0;
+                            break;
+                        case 10:
+                            if(i == 4 || i == 5)    flag_33 = 0;
+                            break;
+                        case 11:
+                            if(i == 6 || i == 7)    flag_33 = 0;
+                            break;
+                    }
+                    break;
                 }
-                // bit同士が同一方向の場合は三三禁ではない
-                switch (j){
-                    case 8:
-                        if(i == 0 || i == 1)    flag_33 = 0;
-                        break;
-                    case 9:
-                        if(i == 2 || i == 3)    flag_33 = 0;
-                        break;
-                    case 10:
-                        if(i == 4 || i == 5)    flag_33 = 0;
-                        break;
-                    case 11:
-                        if(i == 6 || i == 7)    flag_33 = 0;
-                        break;
-                    default:
-                        break;
-                }
-                break;
             }
         }
     } 
