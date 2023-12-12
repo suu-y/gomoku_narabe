@@ -8,3 +8,5 @@ kachimake.o: kachimake.c
 	gcc -I include -c kachimake.c -o kachimake.o -fexec-charset=CP932
 kinzite.o: kinzite.c
 	gcc -I include -c kinzite.c -o kinzite.o -fexec-charset=CP932
+offense.o: offense.c
+	gcc -I include -c offense.c -o offense.o -fexec-charset=CP932

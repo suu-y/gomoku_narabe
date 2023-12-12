@@ -3,6 +3,7 @@
 #include <winsock2.h>
 #include "./judge.h"
 #include "./kachimake.h"
+#include "./offense.h"
 
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
