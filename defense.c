@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include <math.h>
 #include "./defense.h"
+#include "./judge.h"
+
+// 4つ並んだ時にちゃんと防ぐかを確かめる
+// 飛び三の時にちゃんと動くかを確かめる
+// 関数内で禁じ手判定を呼び出す
 
 enum {
     LEFT,               // 0
@@ -15,7 +20,7 @@ enum {
  * 返り値0 : 守り
  * 返り値1 : 攻め
  */
-int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
+int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p, int turn)
 {
     int flag = 0b0000; // 左、上、左上、右上にコマが存在するかを管理する．
     // 左上から順に走査していき、相手の碁が何個並ぶかを判定
@@ -49,11 +54,17 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 if((flag&0b0001)==0b0000)
                 {
                     cnt = countWidth(board, j,i);
+                    // 4個の場合(3個の後に発生する可能性あり)
+                    if(cnt==4)
+                    {
+                        defense4ren(board, j, i, p, 0, turn);
+                        if(p->x>=0 && p->y>=0) return 0;
+                    }
                     // 3個の場合，守りに徹するので結果を返す
-                    if(cnt==3)
+                    else if(cnt==3)
                     {
                         // 置く場所を決める
-                        defense3ren(board, j, i, p, 0);
+                        defense3ren(board, j, i, p, 0, turn);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -61,10 +72,15 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     {
                         // j, iの位置から右に並んでいる、すなわちboard[j][i]とboard[j+1][i]に在る状態
                         // したがって、飛び三の場合はboard[j-2][i]の時かboard[j+3][i]の時
-                        if((j-2>=0 && board[j-2][i]==2) || (j+3<BOARD_SQUARE && board[j+3][i]==2))
+                        if(j-2>=0 && board[j-2][i]==2) // ○ (i,j->)○○
                         {
-                            // 置く場所を決める
-                            /* !!!!!未実装!!!!! */
+                            // 間(board[j-1][i]に置く)
+                            p->x=j-1; p->y=i;
+                            return 0;
+                        } else if(j+3<BOARD_SQUARE && board[j+3][i]==2) // (i,j->)○○ ○
+                        {
+                            // 間(board[j+2][i]に置く)
+                            p->x=j+2; p->y=i;
                             return 0;
                         }
                     }
@@ -74,11 +90,17 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 if((flag&0b0010)==0b0000)
                 {
                     cnt = countVertical(board, j,i);
+                    // 4個の場合(3個の後に発生する可能性あり)
+                    if(cnt==4)
+                    {
+                        defense4ren(board, j, i, p, 1, turn);
+                        if(p->x>=0 && p->y>=0) return 0;
+                    }
                     // 3個の場合，守りに徹するので結果を返す
-                    if(cnt==3)
+                    else if(cnt==3)
                     {
                         // 置く場所を決める
-                        defense3ren(board, j, i, p, 1);
+                        defense3ren(board, j, i, p, 1, turn);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -86,10 +108,14 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     {
                         // j, iの位置から下に並んでいる、すなわちboard[j][i]とboard[j][i+1]に在る状態
                         // したがって、飛び三の場合はboard[j][i-2]の時かboard[j][i+3]の時
-                        if((i-2>=0 && board[j][i-2]==2) || (i+3<BOARD_SQUARE && board[j][i+3]==2))
+                        if(i-2>=0 && board[j][i-2]==2)
                         {
-                            // 置く場所を決める
-                            /* !!!!!未実装!!!!! */
+                            // 間(board[j][i-1]に置く)
+                            p->x=j; p->y=i-1;
+                            return 0;
+                        } else if(i+3<BOARD_SQUARE && board[j][i+3]==2) {
+                            // 間(board[j][i+2]に置く)
+                            p->x=j; p->y=i+2;
                             return 0;
                         }
                     }
@@ -99,11 +125,17 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 if((flag&0b0100)==0b0000)
                 {
                     cnt = countDiagonallyLowerRight(board, j,i);
+                    // 4個の場合(3個の後に発生する可能性あり)
+                    if(cnt==4)
+                    {
+                        defense4ren(board, j, i, p, 2, turn);
+                        if(p->x>=0 && p->y>=0) return 0;
+                    }
                     // 3個の場合，守りに徹するので結果を返す
-                    if(cnt==3)
+                    else if(cnt==3)
                     {
                         // 置く場所を決める
-                        defense3ren(board, j, i, p, 2);
+                        defense3ren(board, j, i, p, 2, turn);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -111,11 +143,14 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     {
                         // j, iの位置から右下に並んでいる、すなわちboard[j][i]とboard[j+1][i+1]に在る状態
                         // したがって、飛び三の場合はboard[j-2][i-2]の時かboard[j+3][i+3]の時
-                        if((j-2>=0 && i-2>=0 && board[j-2][i-2]==2) || (
-                            j+3<BOARD_SQUARE && i+3<BOARD_SQUARE && board[j+3][i+3]==2))
+                        if(j-2>=0 && i-2>=0 && board[j-2][i-2]==2)
                         {
-                            // 置く場所を決める
-                            /* !!!!!未実装!!!!! */
+                            // 間(board[j-1][i-1]に置く)
+                            p->x=j-1; p->y=i-1;
+                            return 0;
+                        } else if(j+3<BOARD_SQUARE && i+3<BOARD_SQUARE && board[j+3][i+3]==2) {
+                            // 間(board[j+2][i+2]に置く)
+                            p->x=j+2; p->y=i+2;
                             return 0;
                         }
                     }
@@ -125,11 +160,17 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 if((flag&0b1000)==0b0000)
                 {
                     cnt = countDiagonallyLowerLeft(board, j,i);
+                    // 4個の場合(3個の後に発生する可能性あり)
+                    if(cnt==4)
+                    {
+                        defense4ren(board, j, i, p, 3, turn);
+                        if(p->x>=0 && p->y>=0) return 0;
+                    }
                     // 3個の場合，守りに徹するので結果を返す
-                    if(cnt==3)
+                    else if(cnt==3)
                     {
                         // 置く場所を決める
-                        defense3ren(board, j, i, p, 3);
+                        defense3ren(board, j, i, p, 3, turn);
                         return 0;
                     }
                     // 2個の場合，飛び三の場合を考える
@@ -137,11 +178,14 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                     {
                         // j, iの位置から左下に並んでいる、すなわちboard[j][i]とboard[j-1][i+1]に在る状態
                         // したがって、飛び三の場合はboard[j+2][i-2]の時かboard[j-3][i+3]の時
-                        if((j+2<BOARD_SQUARE && i-2>=0 && board[j+2][i-2]==2) || (
-                            j-3>=0 && i+3<BOARD_SQUARE && board[j-3][i+3]==2))
+                        if(j+2<BOARD_SQUARE && i-2>=0 && board[j+2][i-2]==2)
                         {
-                            // 置く場所を決める
-                            /* !!!!!未実装!!!!! */
+                            // 間(board[j+1][i-1]に置く)
+                            p->x=j+1; p->y=i-1;
+                            return 0;
+                        } else if(j-3>=0 && i+3<BOARD_SQUARE && board[j-3][i+3]==2) {
+                            // 間(board[j-2][i+2]に置く)
+                            p->x=j-2; p->y=i+2;
                             return 0;
                         }
                     }
@@ -191,7 +235,7 @@ int countDiagonallyLowerLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y
  * mode : 右，下，右下，左下どちらの方向に並んでいるかを制御する．
  *        0:右方向，1:下方向，2:右下方向，3:左下方向とする 
  */
-void defense3ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode)
+void defense3ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode, int turn)
 {
     int dist1=-1, dist2=-1;
     switch(mode)
@@ -241,6 +285,76 @@ void defense3ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, 
                 p->x=x+1; p->y=y-1;
             } else {
                 p->x=x-3; p->y=y+3;
+            }
+            break;
+    }
+}
+
+/* 4つ連続で並んでいた時に，それを防ぐための関数
+ * 3つ並んだ時点で一端は阻止されているので、逆側の端を埋める
+ * x,y  : 相手の並び方を確認した座標の位置(そこから右or下or右下or左下に3つ並んでいる状態)
+ * p    : 座標を格納する構造体へのポインタ
+ * mode : 右，下，右下，左下どちらの方向に並んでいるかを制御する．
+ *        0:右方向，1:下方向，2:右下方向，3:左下方向とする 
+ */
+void defense4ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode, int turn)
+{
+    switch(mode)
+    {
+        case 0: // 右方向に4つ
+            // 今の場所から1つ左●○(<-x,y)○○○か，4つ右(x,y->)○○○○●に置くことになる。
+            // まだコマがおかれていない方に置く
+            if(x-1>=0 && board[x-1][y]==0)
+            {
+                p->x=x-1; p->y=y;
+            }
+            else if(x+4<BOARD_SQUARE && board[x+4][y]==0)
+            {
+                p->x=x+4; p->y=y;
+            } else { // どっちにも置けない場合は相手も進展させようがないので無視
+                p->x=-1; p->y=-1;
+            }
+            break;
+
+        case 1: // 下方向に4つ
+            // 今の場所から1つ上●○(<-x,y)○○○か，4つ下(x,y->)○○○○●に置くことになる
+            if(y-1>=0 && board[x][y-1]==0)
+            {
+                p->x=x; p->y=y-1;
+            }
+            else if(y+4<BOARD_SQUARE && board[x][y+4]==0)
+            {
+                p->x=x; p->y=y+4;
+            } else {
+                p->x=-1; p->y=-1;
+            }
+            break;
+
+        case 2: // 右下に4つ
+            // 今の場所から1つ左上●○(<-x,y)○○○か，4つ右下(x,y->)○○○○●に置くことになる
+            if(x-1>=0 && y-1>=0 && board[x-1][y-1]==0)
+            {
+                p->x=x-1; p->y=y-1;
+            }
+            else if(x+4<BOARD_SQUARE && y+4<BOARD_SQUARE && board[x+4][y+4]==0)
+            {
+                p->x=x+4; p->y=y+4;
+            } else {
+                p->x=-1; p->y=-1;
+            }
+            break;
+
+        case 3: // 左下に4つ
+            // 今の場所から1つ右上○○○○(<-x,y)●か4つ左下●○○○(x,y->)○に置くことになる
+            if(x+1<BOARD_SQUARE && y-1>=0 && board[x+1][y-1]==0)
+            {
+                p->x=x+1; p->y=y-1;
+            }
+            else if(x-4>=0 && y+4<BOARD_SQUARE && board[x-4][y+4]==0)
+            {
+                p->x=x-4; p->y=y+4;
+            } else {
+                p->x=-1; p->y=-1;
             }
             break;
     }
