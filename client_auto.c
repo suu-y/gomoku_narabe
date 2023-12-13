@@ -75,7 +75,7 @@ int main(void) {
             if(x>0 && y>0) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-            judge_kinzite(x-1, y-1, board);
+//            judge_kinzite(x-1, y-1, board);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
@@ -94,10 +94,10 @@ int main(void) {
         if(x>0 && y>0) board[x-1][y-1] = 1;*/
 
         /* -----追加部分----- */
-        place *p;
+        place p;
 //        while(1)
 //        {
-            if(judgeDefense(board, p))
+            if(judgeDefense(board, &p))
             {
                 // 攻め : この場合は自分の手がどこにあるかを走査する必要があるため，専用の関数を呼び出す想定
                 /* テスト用---左上から走査してとにかく空いてるところに置く-- */
@@ -108,7 +108,7 @@ int main(void) {
                     {
                         if(board[j][i]==0)
                         {
-                            p->x=j;p->y=i;
+                            p.x=j;p.y=i;
                             finish=1;
                             break;
                         }
@@ -116,13 +116,15 @@ int main(void) {
                     if(finish) break;
                 }
             }
-            if(p->x>0 && p->y>0) board[x][y] = 1;
+            board[p.x][p.y] = 1;
             // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
 //            if(!judge_kinzite(x-1, y-1, board)) break;
-//            else board[x][y] = 0;
+            /*else*/ board[x][y] = 0;
             // 一旦ここで呼び出す形にしているけど、もしかしてこれ各関数の中で呼び出す形にしやんかったら何回でも禁じ手に置くのでは…？
             // 自分が置いたら禁じ手になるところがこの後のターン経過で変わることは無いと思うので、いっそ3とか入れてしまう…？
 //        }
+        sprintf(message, "%d,%d", p.x+1, p.y+1);
+        printf("%d,%d\n", p.x+1, p.y+1);
         win(board, x, y, message);
         /* -----ここまで----- */
 

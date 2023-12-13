@@ -1,6 +1,6 @@
 #define BOARD_SQUARE 15
 
-typedef struct place {
+typedef struct {
     int x; // x座標の位置
     int y; // y座標の位置
 } place;
