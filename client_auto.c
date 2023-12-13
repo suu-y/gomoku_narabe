@@ -75,7 +75,7 @@ int main(void) {
             if(x>0 && y>0) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-//            judge_kinzite(x-1, y-1, board);
+            judge_kinzite(x-1, y-1, board,message);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
@@ -83,20 +83,11 @@ int main(void) {
         // 五目並べの石を置く座標をユーザーに入力
         memset(&str, '\0', sizeof(str));
         printf("どこに置きますか？: ");
-//        scanf("%s", message);
 
-        /* -----追加部分----- */
-/*        strcpy(str, message);
-        token=strtok(str,",");
-        x = atoi(token);
-        token=strtok(NULL, ",");
-        y = atoi(token);
-        if(x>0 && y>0) board[x-1][y-1] = 1;*/
-
-        /* -----追加部分----- */
+        int isKinzite = 0;
         place p;
-//        while(1)
-//        {
+        do
+        {
             if(judgeDefense(board, &p))
             {
                 // 攻め : この場合は自分の手がどこにあるかを走査する必要があるため，専用の関数を呼び出す想定
@@ -118,11 +109,11 @@ int main(void) {
             }
             board[p.x][p.y] = 1;
             // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
-//            if(!judge_kinzite(x-1, y-1, board)) break;
-            /*else*/ board[x][y] = 0;
+            isKinzite = judge_kinzite(x-1, y-1, board, message);
+            if(isKinzite) board[x][y] = 0;
             // 一旦ここで呼び出す形にしているけど、もしかしてこれ各関数の中で呼び出す形にしやんかったら何回でも禁じ手に置くのでは…？
             // 自分が置いたら禁じ手になるところがこの後のターン経過で変わることは無いと思うので、いっそ3とか入れてしまう…？
-//        }
+        } while(isKinzite);
         sprintf(message, "%d,%d", p.x+1, p.y+1);
         printf("%d,%d\n", p.x+1, p.y+1);
         win(board, x, y, message);
