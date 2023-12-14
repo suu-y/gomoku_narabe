@@ -116,7 +116,7 @@ int main(void) {
         } while(isKinzite);
         sprintf(message, "%d,%d", p.x+1, p.y+1);
         printf("%d,%d\n", p.x+1, p.y+1);
-        win(board, p.x, p.y, message);
+        win(board, p.x+1, p.y+1, message);
         /* -----ここまで----- */
 
         // サーバにデータを送信
