@@ -6,6 +6,9 @@
 #include "./kachimake.h"
 #include "./defense.h"
 
+// 禁じ手呼出を各関数内で行うため，その仕様に合わせてクライアントプログラムを変更(要テスト)
+// 1手目，2手目はwhile文の外で打つようにする？
+
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
     char destination[20];  // アドレス
@@ -58,8 +61,12 @@ int main(void) {
     int x, y;
     int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // 何も置かれていない場所を0，自分が置いた位置を1，相手が置いた位置を2
     /* -----ここまで----- */
-    
-    int isKinzite = 0;
+    /* -----追加部分----- 2023-12-14 15:04 */
+    kinjite *initk; // 禁じ手の最初の座標を格納
+    kinjite *prevk;
+    /* -----ここまで----- */ 
+  
+//    int isKinzite = 0;
     while (1) {
         memset(&message, '\0', sizeof(message));
         // サーバからデータを受信
@@ -86,9 +93,15 @@ int main(void) {
         printf("どこに置きますか？: ");
 
         place p;
+        if(!turn) // 自分が先攻の時のみ禁じ手判定を行う必要がある
+        {
+            initk=NULL;
+            prevk=NULL;
+        }
+
         do
         {
-            if(judgeDefense(board, &p, turn))
+            if(judgeDefense(board, &p))
             {
                 // 攻め : この場合は自分の手がどこにあるかを走査する必要があるため，専用の関数を呼び出す想定
                 /* テスト用---左上から走査してとにかく空いてるところに置く-- */
@@ -109,11 +122,36 @@ int main(void) {
             }
             board[p.x][p.y] = 1;
             // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
-            if(turn) isKinzite = judge_kinzite(x-1, y-1, board, message);
-            if(isKinzite) board[x][y] = 0;
+            if(!turn && judge_kinzite(p.x,p.y,board,*message)) // 先攻かつ禁じ手だった場合
+            {
+                board[p.x][p.y] = 3;
+                // 禁じ手のリストを作成
+                kinjite *tmp;
+                tmp->p.x = p.x; tmp->p.y = p.y;
+                tmp->next = NULL;
+                if(initk==NULL)
+                {
+                    initk=tmp;
+                } else {
+                    prevk->next = tmp;
+                }
+                prevk=tmp;
+            } else { // 禁じ手じゃなかったらwhile文を抜ける
+                break;
+            }
+//            if(isKinzite) board[x][y] = 0;
             // 一旦ここで呼び出す形にしているけど、もしかしてこれ各関数の中で呼び出す形にしやんかったら何回でも禁じ手に置くのでは…？
             // 自分が置いたら禁じ手になるところがこの後のターン経過で変わることは無いと思うので、いっそ3とか入れてしまう…？
-        } while(isKinzite);
+//        } while(isKinzite);
+        } while(!turn);  // 先攻の時のみ禁じ手判定を行うためループ
+        // 禁じ手リストに格納された盤面を0に戻す
+        prevk=initk;
+        while(prevk!=NULL)
+        {
+            board[prevk->p.x][prevk->p.y]=0;
+            prevk=prevk->next;
+        }
+
         sprintf(message, "%d,%d", p.x+1, p.y+1);
         printf("%d,%d\n", p.x+1, p.y+1);
         win(board, p.x+1, p.y+1, message);

@@ -6,7 +6,7 @@ void win(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, char *message)
 {
     if(judgeWin(board, x, y))
     {
-        printf(",win\n");
+        printf("win\n");
         strcat(message, ",win");
     }
 }
