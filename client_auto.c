@@ -6,7 +6,7 @@
 #include "./kachimake.h"
 #include "./defense.h"
 
-// 禁じ手呼出を各関数内で行うため，その仕様に合わせてクライアントプログラムを変更(要テスト)
+// 禁じ手呼出を各関数内で行うため，その仕様に合わせてクライアントプログラムを変更(たぶん大体OK)
 // 1手目，2手目はwhile文の外で打つようにする？
 
 int main(void) {	
@@ -43,11 +43,9 @@ int main(void) {
 
     printf("%sに接続しました\n", destination);
     
-    /* -----追加部分----- */
     int turn;
     if(port == 12345) turn = 0; // 先攻
     else if(port == 12346) turn = 1; // 後攻
-    /* -----ここまで----- */
 
     // ユーザー名をサーバに送信
     char buffer_name[1024];
@@ -56,11 +54,10 @@ int main(void) {
     scanf("%s", user_name);
     send(s, user_name, strlen(user_name), 0);
 
-    /* -----追加部分----- */
     char *token;
     int x, y;
     int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // 何も置かれていない場所を0，自分が置いた位置を1，相手が置いた位置を2
-    /* -----ここまで----- */
+
     /* -----追加部分----- 2023-12-14 15:04 */
     kinjite *initk; // 禁じ手の最初の座標を格納
     kinjite *prevk;
@@ -122,28 +119,25 @@ int main(void) {
             }
             board[p.x][p.y] = 1;
             // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
-            if(!turn && judge_kinzite(p.x,p.y,board,*message)) // 先攻かつ禁じ手だった場合
+            if(!turn && judge_kinzite(p.x,p.y,board,message)) // 先攻かつ禁じ手だった場合
             {
                 board[p.x][p.y] = 3;
                 // 禁じ手のリストを作成
-                kinjite *tmp;
-                tmp->p.x = p.x; tmp->p.y = p.y;
-                tmp->next = NULL;
+                kinjite tmp;
+                tmp.p.x = p.x; tmp.p.y = p.y;
+                tmp.next = NULL;
                 if(initk==NULL)
                 {
-                    initk=tmp;
+                    initk=&tmp;
                 } else {
-                    prevk->next = tmp;
+                    prevk->next = &tmp;
                 }
-                prevk=tmp;
+                prevk=&tmp;
             } else { // 禁じ手じゃなかったらwhile文を抜ける
                 break;
             }
-//            if(isKinzite) board[x][y] = 0;
-            // 一旦ここで呼び出す形にしているけど、もしかしてこれ各関数の中で呼び出す形にしやんかったら何回でも禁じ手に置くのでは…？
-            // 自分が置いたら禁じ手になるところがこの後のターン経過で変わることは無いと思うので、いっそ3とか入れてしまう…？
-//        } while(isKinzite);
         } while(!turn);  // 先攻の時のみ禁じ手判定を行うためループ
+
         // 禁じ手リストに格納された盤面を0に戻す
         prevk=initk;
         while(prevk!=NULL)
@@ -155,7 +149,6 @@ int main(void) {
         sprintf(message, "%d,%d", p.x+1, p.y+1);
         printf("%d,%d\n", p.x+1, p.y+1);
         win(board, p.x+1, p.y+1, message);
-        /* -----ここまで----- */
 
         // サーバにデータを送信
         send(s, message, strlen(message), 0);

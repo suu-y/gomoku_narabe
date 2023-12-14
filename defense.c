@@ -3,8 +3,6 @@
 #include "./defense.h"
 #include "./judge.h"
 
-// 関数内で禁じ手判定を呼び出す
-
 enum {
     LEFT,               // 0
     UPPER,              // 1

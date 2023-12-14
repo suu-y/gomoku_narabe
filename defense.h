@@ -5,9 +5,9 @@ typedef struct {
     int y; // y座標
 } place;
 
-typedef struct {
+typedef struct kinjite {
     place p;        // 禁じ手であった座標
-    kinjite *next;  // リスト構造のためのポインタ
+    struct kinjite *next;  // リスト構造のためのポインタ
 } kinjite;
 
 int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p);
