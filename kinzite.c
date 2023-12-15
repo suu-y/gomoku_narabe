@@ -163,25 +163,100 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     if(cnt_stone == 2)     flag |= 1 << LEFT_LOWER;
 
     // 水平方向左右の判定
-    if((board[x-1][y] == judge_x_o && board[x+1][y] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE)){
-        flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && board[x+1][y]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
     }
+    if(cnt_stone == 1)  flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && board[x-1][y]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << HORIZONTAL_MID;
+
     // 垂直方向上下の判定
-    if((board[x][y-1] == judge_x_o && board[x][y+1] == judge_x_o)
-            && ((y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-2)>=0 && (y+1)<BOARD_SQUARE && board[x][y-1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
     }
+    if(cnt_stone == 1)  flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-1)>=0 && (y+2)<BOARD_SQUARE && board[x][y+1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << VERTICAL_MID;
+
     // 左斜め方向上下の判定
-    if((board[x-1][y-1] == judge_x_o && board[x+1][y+1] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << DIAGONALLY_LEFT;
-    }            
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && (y-2)>=0 && (y+1)<BOARD_SQUARE
+        && board[x+1][y+1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_LEFT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && (y-1)>=0 && (y+2)<BOARD_SQUARE
+        && board[x-1][y-1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_LEFT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << DIAGONALLY_LEFT;
+           
     // 右斜め方向上下の判定
-    if((board[x+1][y-1] == judge_x_o && board[x-1][y+1] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << DIAGONALLY_RIGHT;
-    }  
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+2)<BOARD_SQUARE
+        && board[x+1][y-1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_RIGHT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && (y-2)>=0 && (y+1)<BOARD_SQUARE
+        && board[x-1][y+1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_RIGHT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << DIAGONALLY_RIGHT; 
 
     /*
      * 三三禁になるのは、0-7bit間で2bit立つ または 8-11bit間で2bit立つ
