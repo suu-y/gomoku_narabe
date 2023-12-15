@@ -62,27 +62,69 @@ int main(void) {
     kinjite *initk; // 禁じ手の最初の座標を格納
     kinjite *prevk;
     /* -----ここまで----- */ 
+
+    /* -----追加部分：1手目，2手目を自動で打つ．真ん中は取れるなら取りたいと思うので，もし相手が取って来なかったら後手でもそっちに打つ----- */
+    memset(&message, '\0', sizeof(message));
+    recv(s, message, sizeof(message), 0); // 先攻ならstartを，後攻なら相手の手を受信
+    if(!turn) // 先攻の場合
+    {
+        // 真ん中に置く．
+        sprintf(message, "8,8");
+        printf("どこに置きますか？: 8,8\n");
+        board[7][7]=1;
+        // サーバにデータを送信
+        send(s, message, strlen(message), 0);
+    } else { // 後攻の場合
+        // 相手の手を受け取る
+        printf("相手が置いた位置: ");
+        strcpy(str, message);
+        token=strtok(str,",");
+        x = atoi(token);
+        token=strtok(NULL, ",");
+        y = atoi(token);
+        if(x>0 && y>0) board[x-1][y-1] = 2;
+
+        // 相手の手の禁じ手を確認
+        judge_kinzite(x-1, y-1, board,message);
+        printf("%s\n", message);
+
+        // もし中央が空いていればそこへ，空いていなければその回り8個のうちどこかに置く
+        if(board[7][7]==0)
+        {
+            // 真ん中に置く．
+            sprintf(message, "8,8");
+            printf("どこに置きますか？: 8,8\n");
+            board[7][7]=1;
+            // サーバにデータを送信
+            send(s, message, strlen(message), 0);            
+        } else { // 8個のうちランダムにどこかに置く
+            x = 7 + ((rand()%3)-1); // rand()%3:0,1,2の乱数→rand()%3-1:-1,0,1の乱数→+7:6,7,8の乱数
+            y = 7 + ((rand()%3)-1);
+            if(x==7&&y==7) x++; // とりあえずxに1足す
+
+            sprintf(message, "%d,%d", x+1, y+1);
+            printf("どこに置きますか？: %d,%d\n", x+1, y+1);
+            board[x][y]=1;
+            // サーバにデータを送信
+            send(s, message, strlen(message), 0);
+        }
+    }
   
-//    int isKinzite = 0;
     while (1) {
         memset(&message, '\0', sizeof(message));
         // サーバからデータを受信
         recv(s, message, sizeof(message), 0);
         if(strcmp(message, "end")==0) break;
-        else if (strcmp(message, "start") != 0) {
-            printf("相手が置いた位置: ");
-            /* -----追加部分----- */
-            strcpy(str, message);
-            token=strtok(str,",");
-            x = atoi(token);
-            token=strtok(NULL, ",");
-            y = atoi(token);
-            if(x>0 && y>0) board[x-1][y-1] = 2;
+        printf("相手が置いた位置: ");
+        strcpy(str, message);
+        token=strtok(str,",");
+        x = atoi(token);
+        token=strtok(NULL, ",");
+        y = atoi(token);
+        if(x>0 && y>0) board[x-1][y-1] = 2;
 
-            // 相手の手の禁じ手を確認
-            judge_kinzite(x-1, y-1, board,message);
-            /* -----ここまで----- */
-        }
+        // 相手の手の禁じ手を確認
+        judge_kinzite(x-1, y-1, board,message);
         printf("%s\n", message);
 
         // 五目並べの石を置く座標をユーザーに入力
@@ -138,12 +180,15 @@ int main(void) {
             }
         } while(!turn);  // 先攻の時のみ禁じ手判定を行うためループ
 
-        // 禁じ手リストに格納された盤面を0に戻す
-        prevk=initk;
-        while(prevk!=NULL)
+        // 先攻の場合，禁じ手リストに格納された盤面を0に戻す
+        if(!turn)
         {
-            board[prevk->p.x][prevk->p.y]=0;
-            prevk=prevk->next;
+            prevk=initk;
+            while(prevk!=NULL)
+            {
+                board[prevk->p.x][prevk->p.y]=0;
+                prevk=prevk->next;
+            }
         }
 
         sprintf(message, "%d,%d", p.x+1, p.y+1);

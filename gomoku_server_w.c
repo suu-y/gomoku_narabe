@@ -88,54 +88,54 @@ int displayBoard(char *str, int turn){
 
 int main(int argc, char* argv[]){
 
-  SOCKET s, s1;         //ソケット
-  int result;          //戻り値
+  SOCKET s, s1;         //繧ｽ繧ｱ繝�繝�
+  int result;          //謌ｻ繧雁､
 
-  //接続を許可するクライアント端末の情報
+  //謗･邯壹ｒ險ｱ蜿ｯ縺吶ｋ繧ｯ繝ｩ繧､繧｢繝ｳ繝育ｫｯ譛ｫ縺ｮ諠�蝣ｱ
 
   struct sockaddr_in source;
   char name1[1024], name2[1024];
 
   memset(name1, '\0', sizeof(name1));
 
-  //送信元の端末情報を登録する
+  //騾∽ｿ｡蜈�縺ｮ遶ｯ譛ｫ諠�蝣ｱ繧堤匳骭ｲ縺吶ｋ
 
   memset(&source, 0, sizeof(source));
   source.sin_family = AF_INET;
 
-  //ポート番号はクライアントプログラムと共通
+  //繝昴�ｼ繝育分蜿ｷ縺ｯ繧ｯ繝ｩ繧､繧｢繝ｳ繝医�励Ο繧ｰ繝ｩ繝�縺ｨ蜈ｱ騾�
 
   source.sin_port = htons(12345);
   source.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //ソケット通信の開始準備
+  //繧ｽ繧ｱ繝�繝磯壻ｿ｡縺ｮ髢句ｧ区ｺ門ｙ
   WSADATA data;
   result = WSAStartup(MAKEWORD(2, 0), &data);
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ソケット通信準備エラー\n");
+    printf("繧ｽ繧ｱ繝�繝磯壻ｿ｡貅門ｙ繧ｨ繝ｩ繝ｼ\n");
   }
 
 
 
-  //ソケットの生成
+  //繧ｽ繧ｱ繝�繝医�ｮ逕滓��
   s = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (s < 0){
     printf("%d\n", GetLastError());
-    printf("ソケット生成エラー\n");
+    printf("繧ｽ繧ｱ繝�繝育函謌舌お繝ｩ繝ｼ\n");
   }
 
-  //ソケットのバインド
+  //繧ｽ繧ｱ繝�繝医�ｮ繝舌う繝ｳ繝�
   result = bind(s, (struct sockaddr *)&source, sizeof(source));
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("バインドエラー\n");
+    printf("繝舌う繝ｳ繝峨お繝ｩ繝ｼ\n");
   }
 
-  //接続の許可
+  //謗･邯壹�ｮ險ｱ蜿ｯ
   result = listen(s, 1);
   if (result < 0){
-    printf("接続許可エラー\n");
+    printf("謗･邯夊ｨｱ蜿ｯ繧ｨ繝ｩ繝ｼ\n");
   }
 
 
@@ -143,69 +143,69 @@ int main(int argc, char* argv[]){
 
 
 
-  //クライアントから通信があるまで待機
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医°繧蛾壻ｿ｡縺後≠繧九∪縺ｧ蠕�讖�
   s1 = accept(s, NULL, NULL);
   if (s1 < 0){
-    printf("待機エラー\n");
+    printf("蠕�讖溘お繝ｩ繝ｼ\n");
   }
 
-  //クライアントへデータを送信する
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医∈繝�繝ｼ繧ｿ繧帝∽ｿ｡縺吶ｋ
   result = send(s1, "player1 name = ", 20, 0);
 
-  //クライアントから送信されたデータの受信
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医°繧蛾∽ｿ｡縺輔ｌ縺溘ョ繝ｼ繧ｿ縺ｮ蜿嶺ｿ｡
   result = recv(s1, name1, 20, 0);
   if (result < 0){
-    printf("受信エラー\n");
+    printf("蜿嶺ｿ｡繧ｨ繝ｩ繝ｼ\n");
   }
 
-  printf("%sを受信しました\n", name1);
+  printf("%s繧貞女菫｡縺励∪縺励◆\n", name1);
 
 
 
-  SOCKET s2, s3;         //ソケット
+  SOCKET s2, s3;         //繧ｽ繧ｱ繝�繝�
 
-  //接続を許可するクライアント端末の情報
+  //謗･邯壹ｒ險ｱ蜿ｯ縺吶ｋ繧ｯ繝ｩ繧､繧｢繝ｳ繝育ｫｯ譛ｫ縺ｮ諠�蝣ｱ
 
   struct sockaddr_in source2;
 
   memset(name2, '\0', sizeof(name2));
 
-  //送信元の端末情報を登録する
+  //騾∽ｿ｡蜈�縺ｮ遶ｯ譛ｫ諠�蝣ｱ繧堤匳骭ｲ縺吶ｋ
 
   memset(&source2, 0, sizeof(source2));
   source2.sin_family = AF_INET;
 
-  //ポート番号はクライアントプログラムと共通
+  //繝昴�ｼ繝育分蜿ｷ縺ｯ繧ｯ繝ｩ繧､繧｢繝ｳ繝医�励Ο繧ｰ繝ｩ繝�縺ｨ蜈ｱ騾�
 
   source2.sin_port = htons(12346);
   source2.sin_addr.s_addr = htonl(INADDR_ANY);
 
-  //ソケット通信の開始準備
+  //繧ｽ繧ｱ繝�繝磯壻ｿ｡縺ｮ髢句ｧ区ｺ門ｙ
   WSADATA data2;
   result = WSAStartup(MAKEWORD(2, 0), &data2);
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("ソケット通信準備エラー\n");
+    printf("繧ｽ繧ｱ繝�繝磯壻ｿ｡貅門ｙ繧ｨ繝ｩ繝ｼ\n");
   }
 
-  //ソケットの生成
+  //繧ｽ繧ｱ繝�繝医�ｮ逕滓��
   s2 = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
   if (s2 < 0){
     printf("%d\n", GetLastError());
-    printf("ソケット生成エラー\n");
+    printf("繧ｽ繧ｱ繝�繝育函謌舌お繝ｩ繝ｼ\n");
   }
 
-  //ソケットのバインド
+  //繧ｽ繧ｱ繝�繝医�ｮ繝舌う繝ｳ繝�
   result = bind(s2, (struct sockaddr *)&source2, sizeof(source2));
   if (result < 0){
     printf("%d\n", GetLastError());
-    printf("バインドエラー\n");
+    printf("繝舌う繝ｳ繝峨お繝ｩ繝ｼ\n");
   }
 
-  //接続の許可
+  //謗･邯壹�ｮ險ｱ蜿ｯ
   result = listen(s2, 1);
   if (result < 0){
-    printf("接続許可エラー\n");
+    printf("謗･邯夊ｨｱ蜿ｯ繧ｨ繝ｩ繝ｼ\n");
   }
 
 
@@ -213,25 +213,25 @@ int main(int argc, char* argv[]){
 
 
 
-  //クライアントから通信があるまで待機
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医°繧蛾壻ｿ｡縺後≠繧九∪縺ｧ蠕�讖�
   s3 = accept(s2, NULL, NULL);
   if (s3 < 0){
-    printf("待機エラー\n");
+    printf("蠕�讖溘お繝ｩ繝ｼ\n");
   }
 
-  //クライアントへデータを送信する
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医∈繝�繝ｼ繧ｿ繧帝∽ｿ｡縺吶ｋ
   result = send(s3, "player2 name= ", 20, 0);
 
-  //クライアントから送信されたデータの受信
+  //繧ｯ繝ｩ繧､繧｢繝ｳ繝医°繧蛾∽ｿ｡縺輔ｌ縺溘ョ繝ｼ繧ｿ縺ｮ蜿嶺ｿ｡
   result = recv(s3, name2, 20, 0);
   if (result < 0){
-    printf("受信エラー\n");
+    printf("蜿嶺ｿ｡繧ｨ繝ｩ繝ｼ\n");
   }
 
-  printf("%sを受信しました\n", name2);
+  printf("%s繧貞女菫｡縺励∪縺励◆\n", name2);
 
 
-  char buffer[1024] = "start";  //受信データのバッファ領域
+  char buffer[1024] = "start";  //蜿嶺ｿ｡繝�繝ｼ繧ｿ縺ｮ繝舌ャ繝輔ぃ鬆伜沺
 
   while(1){
 
@@ -242,17 +242,17 @@ int main(int argc, char* argv[]){
     result = recv(s1, buffer, sizeof(buffer), 0);
 
     if (result < 0){
-      printf("受信エラー\n");
+      printf("蜿嶺ｿ｡繧ｨ繝ｩ繝ｼ\n");
       break;
     }
 
-    printf("%sを受信しました(%s)\n", buffer, name1);
+    printf("%s繧貞女菫｡縺励∪縺励◆(%s)\n", buffer, name1);
 
 
     char buffer1[1024];
     strcpy(buffer1,buffer);
     if(!displayBoard(buffer1,1)){
-      printf("ゲームセット\n");
+      printf("繧ｲ繝ｼ繝�繧ｻ繝�繝�\n");
       break;
     }
 
@@ -262,18 +262,18 @@ int main(int argc, char* argv[]){
     result = recv(s3, buffer, sizeof(buffer), 0);
 
     if (result < 0){
-      printf("受信エラー\n");
+      printf("蜿嶺ｿ｡繧ｨ繝ｩ繝ｼ\n");
       break;
     }
     
 
-    printf("%sを受信しました(%s)\n", buffer, name2);
+    printf("%s繧貞女菫｡縺励∪縺励◆(%s)\n", buffer, name2);
 
     char buffer2[256];
     strcpy(buffer2,buffer);
 
     if(!displayBoard(buffer2,2)){
-      printf("ゲームセット\n");
+      printf("繧ｲ繝ｼ繝�繧ｻ繝�繝�\n");
       break;
     }
 
@@ -282,12 +282,12 @@ int main(int argc, char* argv[]){
   result = send(s1, "end", 10, 0);
   result = send(s3, "end", 10, 0);
 
-  printf("接続終了\n");
+  printf("謗･邯夂ｵゆｺ�\n");
   closesocket(s1);
   closesocket(s3);
 
 
-  //ソケット通信の終了
+  //繧ｽ繧ｱ繝�繝磯壻ｿ｡縺ｮ邨ゆｺ�
   WSACleanup();
 
   printf("END\n");
