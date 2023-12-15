@@ -85,6 +85,11 @@ int main(void) {
             // 五目並べの石を置く座標をユーザーに入力
             memset(&str, '\0', sizeof(str));
             printf("どこに置きますか？: ");
+
+            // 攻める場所を決める
+            // 問題点: offence関数呼び出し後、盤面が'1'で埋まってしまう
+            offense(board);
+
             scanf("%s", message);
 
             strcpy(str, message);
