@@ -28,34 +28,46 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
             if(x >= (BOARD_SQUARE*2/3) && y >= (BOARD_SQUARE*2/3))    break;
             
             // 判定のために(x, y)に自分の石を置く
+            //printf("(%d, %d)\n", x+1, y+1);
             int stone_x_o = board[x][y];
-            //printf("現在の座標の石は %d \n", stone_x_o);
-            board[x][y] = 1;
+            int flag_chouren;
+            int flag_43;
 
-            // 判定を行う
-            if(is_5ren(x, y, board)){
-                printf("\n5連を作れます: (%d, %d)\n", x, y);
-                // 盤面を元の状態に戻す
-                board[x][y] = stone_x_o;                
-                break;
+            if(stone_x_o == 0){
+
+                board[x][y] = 1;
+
+                flag_chouren = is_chouren(x, y, board);
+                flag_43 = is_43(x, y, board);
+
+                // 判定を行う
+    /*            
+                if(is_5ren(x, y, board)){
+                    printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
+                    // 盤面を元の状態に戻す
+                    board[x][y] = stone_x_o;                
+                    break;
+                }
+                else */
+                if(flag_chouren){
+                    printf("\n長連を作れます: (%d, %d)\n", x+1, y+1);
+                    // 盤面を元の状態に戻す
+                    board[x][y] = stone_x_o;  
+                    break;
+                }
+                else if(flag_43){
+                    printf("\n四三を作れます: (%d, %d)\n", x+1, y+1);
+                    // 盤面を元の状態に戻す
+                    board[x][y] = stone_x_o;  
+                    break;
+                }
+                else{
+                    // 盤面を元の状態に戻す
+                    // この時、盤面の探索は続けたいのでbreakしない
+                    board[x][y] = stone_x_o;  
+                }
             }
-            else if(is_chouren(x, y, board)){
-                printf("\n長連を作れます: (%d, %d)\n", x, y);
-                // 盤面を元の状態に戻す
-                board[x][y] = stone_x_o;  
-                break;
-            }
-            else if(is_43(x, y, board)){
-                printf("\n四三を作れます: (%d, %d)\n", x, y);
-                // 盤面を元の状態に戻す
-                board[x][y] = stone_x_o;  
-                break;
-            }
-            else{
-                // 盤面を元の状態に戻す
-                // この時、盤面の探索は続けたいのでbreakしない
-                board[x][y] = stone_x_o;  
-            }
+            if(flag_chouren == 1 || flag_43 == 1)   break;
         }
     }
 }
@@ -643,25 +655,100 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     if(cnt_stone == 2)     flag |= 1 << LEFT_LOWER;
 
     // 水平方向左右の判定
-    if((board[x-1][y] == judge_x_o && board[x+1][y] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE)){
-        flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && board[x+1][y]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
     }
+    if(cnt_stone == 1)  flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && board[x-1][y]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << HORIZONTAL_MID;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << HORIZONTAL_MID;
+
     // 垂直方向上下の判定
-    if((board[x][y-1] == judge_x_o && board[x][y+1] == judge_x_o)
-            && ((y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-2)>=0 && (y+1)<BOARD_SQUARE && board[x][y+1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
     }
+    if(cnt_stone == 1)  flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-1)>=0 && (y+2)<BOARD_SQUARE && board[x][y-1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << VERTICAL_MID;
+    cnt_stone = 0;
+    if((y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << VERTICAL_MID;
+
     // 左斜め方向上下の判定
-    if((board[x-1][y-1] == judge_x_o && board[x+1][y+1] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << DIAGONALLY_LEFT;
-    }            
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && (y-2)>=0 && (y+1)<BOARD_SQUARE
+        && board[x+1][y+1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_LEFT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && (y-1)>=0 && (y+2)<BOARD_SQUARE
+        && board[x-1][y-1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_LEFT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y+i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << DIAGONALLY_LEFT;
+           
     // 右斜め方向上下の判定
-    if((board[x+1][y-1] == judge_x_o && board[x-1][y+1] == judge_x_o)
-            && ((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE)){
-        flag |= 1 << DIAGONALLY_RIGHT;
-    }  
+    cnt_stone = 0;
+    if((x-2)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+2)<BOARD_SQUARE
+        && board[x+1][y-1]==judge_x_o){
+        for(int i=-2; i<0; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_RIGHT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+2)<BOARD_SQUARE && (y-2)>=0 && (y+1)<BOARD_SQUARE
+        && board[x-1][y+1]==judge_x_o){
+        for(int i=1; i<3; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 1)  flag |= 1 << DIAGONALLY_RIGHT;
+    cnt_stone = 0;
+    if((x-1)>=0 && (x+1)<BOARD_SQUARE && (y-1)>=0 && (y+1)<BOARD_SQUARE){
+        for(int i=-1; i<2; i++){
+            if(board[x+i][y-i] == judge_x_o)  cnt_stone ++;
+        }
+    }
+    if(cnt_stone == 3)  flag |= 1 << DIAGONALLY_RIGHT;
 
     /*
      * 　四三が成立するには、0-11bit間で少なくとも3bit分は立つ必要がある
@@ -671,6 +758,7 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      * 　時が**四三**となる
      */
 
+    //printf("43-フラグ: %x\n", flag);
     int flag_tmp = flag;
     //int flag_return = flag;   // フラグを返り値にする場合の変数宣言
     int flag_0to7 = (flag &= 0b000011111111);

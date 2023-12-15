@@ -187,14 +187,14 @@ int judge_33(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     // 垂直方向上下の判定
     cnt_stone = 0;
-    if((y-2)>=0 && (y+1)<BOARD_SQUARE && board[x][y-1]==judge_x_o){
+    if((y-2)>=0 && (y+1)<BOARD_SQUARE && board[x][y+1]==judge_x_o){
         for(int i=-2; i<0; i++){
             if(board[x][y+i] == judge_x_o)  cnt_stone ++;
         }
     }
     if(cnt_stone == 1)  flag |= 1 << VERTICAL_MID;
     cnt_stone = 0;
-    if((y-1)>=0 && (y+2)<BOARD_SQUARE && board[x][y+1]==judge_x_o){
+    if((y-1)>=0 && (y+2)<BOARD_SQUARE && board[x][y-1]==judge_x_o){
         for(int i=1; i<3; i++){
             if(board[x][y+i] == judge_x_o)  cnt_stone ++;
         }
