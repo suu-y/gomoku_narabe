@@ -1,5 +1,6 @@
 /* 自動で手が打てるクライアントプログラム */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
 #include "./judge.h"
@@ -8,6 +9,7 @@
 
 // 禁じ手呼出を各関数内で行うため，その仕様に合わせてクライアントプログラムを変更(たぶん大体OK)
 // 1手目，2手目はwhile文の外で打つようにする？
+// 同じアドレスを指しちゃう…
 
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
@@ -122,10 +124,9 @@ int main(void) {
         token=strtok(NULL, ",");
         y = atoi(token);
         if(x>0 && y>0) board[x-1][y-1] = 2;
-
-        // 相手の手の禁じ手を確認
-        judge_kinzite(x-1, y-1, board,message);
         printf("%s\n", message);
+        // 相手の手の禁じ手を確認
+        if(turn && judge_kinzite(x-1, y-1, board,message)) send(s,message,strlen(message),0);
 
         // 五目並べの石を置く座標をユーザーに入力
         memset(&str, '\0', sizeof(str));
@@ -140,6 +141,7 @@ int main(void) {
 
         do
         {
+            memset(&message, '\0', sizeof(message));
             if(judgeDefense(board, &p))
             {
                 // 攻め : この場合は自分の手がどこにあるかを走査する必要があるため，専用の関数を呼び出す想定
@@ -165,16 +167,16 @@ int main(void) {
             {
                 board[p.x][p.y] = 3;
                 // 禁じ手のリストを作成
-                kinjite tmp;
-                tmp.p.x = p.x; tmp.p.y = p.y;
-                tmp.next = NULL;
+                kinjite *tmp=malloc(sizeof(kinjite));
+                (tmp->p).x = p.x; (tmp->p).y = p.y;
+                tmp->next = NULL;
                 if(initk==NULL)
                 {
-                    initk=&tmp;
+                    initk=tmp;
                 } else {
-                    prevk->next = &tmp;
+                    prevk->next = tmp;
                 }
-                prevk=&tmp;
+                prevk=tmp;
             } else { // 禁じ手じゃなかったらwhile文を抜ける
                 break;
             }
@@ -197,7 +199,6 @@ int main(void) {
 
         // サーバにデータを送信
         send(s, message, strlen(message), 0);
-
 
     }
 
