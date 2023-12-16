@@ -4,6 +4,7 @@
 #include "./judge.h"
 #include "./kachimake.h"
 #include "./defense.h"
+#include "./offense.h"
 
 int main(void) {	
     // アドレス、ポート番号、送信メッセージを入力
@@ -78,7 +79,7 @@ int main(void) {
             if(x>0 && y>0) board[x-1][y-1] = 2;
 
             // 相手の手の禁じ手を確認
-            judge_kinzite(x-1, y-1, board,message);
+            judge_kinzite(x-1, y-1, board, message);
             /* -----ここまで----- */
         }
         printf("%s\n", message);
