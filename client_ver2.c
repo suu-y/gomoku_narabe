@@ -3,6 +3,7 @@
 #include <winsock2.h>
 #include "./judge.h"
 #include "./kachimake.h"
+#include "./defense.h"
 #include "./offense.h"
 
 int main(void) {	
@@ -57,6 +58,10 @@ int main(void) {
     int x, y;
     int board[BOARD_SQUARE][BOARD_SQUARE] = {{0}}; // 何も置かれていない場所を0，自分が置いた位置を1，相手が置いた位置を2
     /* -----ここまで----- */
+    /* -----追加部分----- 2023-12-14 15:04 */
+    kinjite *initk; // 禁じ手の最初の座標を格納
+    kinjite *prevk;
+    /* -----ここまで----- */ 
     
     while (1) {
         memset(&message, '\0', sizeof(message));
@@ -79,34 +84,85 @@ int main(void) {
         }
         printf("%s\n", message);
 
-        // 禁じ手となる手を置くことを防ぐdo-while
-        int isKinzite = 0;
-        do{
+        place p;
+        if(!turn) // 自分が先攻の時のみ禁じ手判定を行う必要がある
+        {
+            initk=NULL;
+            prevk=NULL;
+        }
+
+        do
+        {
             // 五目並べの石を置く座標をユーザーに入力
             memset(&str, '\0', sizeof(str));
             printf("どこに置きますか？: ");
-
-            // 攻める場所を決める
-            // 問題点: offence関数呼び出し後、盤面が'1'で埋まってしまう
-            offense(board);
-
             scanf("%s", message);
 
+            /* -----追加部分----- */
             strcpy(str, message);
             token=strtok(str,",");
             x = atoi(token);
             token=strtok(NULL, ",");
             y = atoi(token);
-            if(x>0 && y>0 && x<=BOARD_SQUARE && y<=BOARD_SQUARE) board[x-1][y-1] = 1;
+            if(x>0 && y>0) board[x-1][y-1] = 1;
 
-            // 自分の手の禁じ手を確認
-            isKinzite = judge_kinzite(x-1, y-1, board, message);
-            if(isKinzite == 1){
-                // 禁じ手の場合、盤面を元の状態に戻す
-                board[x-1][y-1] = 0;
+            // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
+            if(!turn && judge_kinzite(x-1,y-1,board,message)) // 先攻かつ禁じ手だった場合
+            {
+                board[x-1][y-1] = 3;
+                // 禁じ手のリストを作成
+                kinjite *tmp=malloc(sizeof(kinjite));
+                (tmp->p).x = x-1; (tmp->p).y = y-1;
+                tmp->next = NULL;
+                if(initk==NULL)
+                {
+                    initk=tmp;
+                } else {
+                    prevk->next = tmp;
+                }
+                prevk=tmp;
+            } else { // 禁じ手じゃなかったらwhile文を抜ける
+                break;
             }
-            else    win(board, x, y, message);
-        }while(isKinzite == 1);
+        } while(!turn);
+
+        // -----デバッグ用
+/*        int a,b;
+        for(a=0;a<BOARD_SQUARE;a++)
+        {
+            for(b=0;b<BOARD_SQUARE;b++)
+            {
+                printf("%d ",board[b][a]);
+            }
+            printf("\n");
+        }*/
+        
+        // 自分の手の禁じ手を確認
+
+        // 禁じ手リストに格納された盤面を0に戻す
+        if(!turn)
+        {
+            prevk=initk;
+            while(prevk!=NULL)
+            {
+                board[(prevk->p).x][(prevk->p).y]=0;
+                prevk=prevk->next;
+            }
+        }
+
+        // -----デバッグ用-----
+/*        printf("元に戻したあと\n");
+        for(a=0;a<BOARD_SQUARE;a++)
+        {
+            for(b=0;b<BOARD_SQUARE;b++)
+            {
+                printf("%d ",board[b][a]);
+            }
+            printf("\n");
+        }*/
+
+        win(board, x, y, message);
+        /* -----ここまで----- */
 
         // サーバにデータを送信
         send(s, message, strlen(message), 0);
