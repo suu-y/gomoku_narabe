@@ -554,6 +554,7 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     int cnt_stone = 0;
 
     int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
+    int flag_4ren = 0b00000000;         // 8bitで4連の時は特別にこのフラグを立てる
 
     // 左側2連の判定
     if((x-3)>=0){     // 飛び三
@@ -564,7 +565,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     else if((board[x-2][y] == judge_x_o && board[x-1][y] == judge_x_o) && (x-2)>=0){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << LEFT;
+    if(cnt_stone == 2){
+        flag |= 1 << LEFT;
+        if(board[x-4][y] == judge_x_o && (x-4)>=0)   flag_4ren |= 1 << LEFT;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << LEFT;
+        flag_4ren |= 1 << LEFT;
+    }
 
     // 右側2連の判定
     cnt_stone = 0;
@@ -576,7 +584,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     else if((board[x+2][y] == judge_x_o && board[x+1][y] == judge_x_o) && (x+2)<BOARD_SQUARE){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << RIGHT;
+    if(cnt_stone == 2){
+        flag |= 1 << RIGHT;
+        if(board[x+4][y] == judge_x_o && (x+4)<BOARD_SQUARE)   flag_4ren |= 1 << RIGHT;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << RIGHT;
+        flag_4ren |= 1 << RIGHT;
+    }
    
     // 下側2連の判定
     cnt_stone = 0;
@@ -588,7 +603,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     else if((board[x][y+2] == judge_x_o && board[x][y+1] == judge_x_o) && (y+2)<BOARD_SQUARE){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << LOWER;
+    if(cnt_stone == 2){
+        flag |= 1 << LOWER;
+        if(board[x][y+4] == judge_x_o && (y+4)<BOARD_SQUARE)   flag_4ren |= 1 << LOWER;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << LOWER;
+        flag_4ren |= 1 <<LOWER;
+    }
 
     // 上側2連の判定
     cnt_stone = 0;
@@ -600,7 +622,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     else if((board[x][y-2] == judge_x_o && board[x][y-1] == judge_x_o) && (y-2)>=0){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << UPPER;
+    if(cnt_stone == 2){
+        flag |= 1 << UPPER;
+        if(board[x][y-4] == judge_x_o && (y-4)>=0)   flag_4ren |= 1 << UPPER;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << UPPER;
+        flag_4ren |= 1 << UPPER;
+    }
 
     // 斜め右下2連の判定
     cnt_stone = 0;
@@ -613,7 +642,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             && ((x+2)<BOARD_SQUARE && (y+2)<BOARD_SQUARE)){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << RIGHT_LOWER;
+    if(cnt_stone == 2){
+        flag |= 1 << RIGHT_LOWER;
+        if(board[x+4][y+4] == judge_x_o && (x+4)<BOARD_SQUARE && (y+4)<BOARD_SQUARE)   flag_4ren |= 1 << RIGHT_LOWER; // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << RIGHT_LOWER;
+        flag_4ren |= 1 << RIGHT_LOWER;
+    }
 
     // 斜め左上2連の判定
     cnt_stone = 0;
@@ -626,7 +662,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             && ((x-2)>=0 && (y-2)>=0)){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << LEFT_UPPER;
+    if(cnt_stone == 2){
+        flag |= 1 << LEFT_UPPER;
+        if(board[x-4][y-4] == judge_x_o && (x-4)>=0 && (y-4)>=0)   flag_4ren |= 1 << LEFT_UPPER;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << LEFT_UPPER;
+        flag_4ren |= 1 << LEFT_UPPER;
+    }
 
     // 斜め右上2連の判定
     cnt_stone = 0;
@@ -639,7 +682,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             && ((x+2)<BOARD_SQUARE && (y-2)>=0)){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << RIGHT_UPPER;
+    if(cnt_stone == 2){
+        flag |= 1 << RIGHT_UPPER;
+        if(board[x+4][y-4] == judge_x_o && (x+4)<BOARD_SQUARE && (y-4)>=0)   flag_4ren |= 1 << RIGHT_UPPER;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << RIGHT_UPPER;
+        flag_4ren |= 1 <<RIGHT_UPPER;
+    }
 
     // 斜め左下2連の判定
     cnt_stone = 0;
@@ -652,7 +702,14 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             && ((x-2)>=0 && (y+2)<BOARD_SQUARE)){
         cnt_stone = 2;
     }
-    if(cnt_stone == 2)     flag |= 1 << LEFT_LOWER;
+    if(cnt_stone == 2){
+        flag |= 1 << LEFT_LOWER;
+        if(board[x-4][y+4] == judge_x_o && (x-4)>=0 && (y+4)<BOARD_SQUARE)   flag_4ren |= 1 << LEFT_LOWER;  // 飛び四
+    }
+    else if(cnt_stone == 3){    // 四
+        flag |= 1 << LEFT_LOWER;
+        flag_4ren |= 1 <<LEFT_LOWER;
+    }
 
     // 水平方向左右の判定
     cnt_stone = 0;
@@ -771,6 +828,11 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                     && !(i==LOWER && j==UPPER)
                     && !(i==RIGHT_LOWER && j==LEFT_UPPER)
                     && !(i==RIGHT_UPPER && j==LEFT_LOWER)) {
+                // フラグ2個で四三の時
+                if(flag_4ren == (1 << i) || flag_4ren == (1 << j)){
+                    flag_43 = 1;
+                    break;
+                }
                 // 「0-7bit間で2bit立つ」時に8-11bit間で同一方向のbitが1つ立つ　時を調査
                 for(int h = 8; h < 12; ++h){
                     int condition_1 = (1 << h);
@@ -836,6 +898,37 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
             }
         }
     }
+
+    // 0-7bit, 8-11bit間で1bitずつ立つ（このとき計2bitしか立っていない）
+    // かつ flag_4ren が立っている
+    for(int i = 0; i < 8; ++i) {
+        int condition_5 = (1 << i);
+        if(flag_0to7 == condition_5 && flag_4ren == condition_5) {
+            for(int j = 8; j < 12; ++j) {
+                int condition_6 = (1 << j);
+                if(flag_8to11 == condition_6){
+                    flag_43 = 1;
+
+                    // bit同士が同一方向の場合は四三ではない
+                    switch (j){
+                        case 8:
+                            if(i == 0 || i == 1)    flag_43 = 0;
+                            break;
+                        case 9:
+                            if(i == 2 || i == 3)    flag_43 = 0;
+                            break;
+                        case 10:
+                            if(i == 4 || i == 5)    flag_43 = 0;
+                            break;
+                        case 11:
+                            if(i == 6 || i == 7)    flag_43 = 0;
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+    } 
 
     if(flag_43) return 1;
     else    return 0;
