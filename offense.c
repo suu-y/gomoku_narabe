@@ -19,7 +19,17 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
      * 1. 5連（勝ち）
      * 2. 長連（勝ち、後攻の時のみ）
      * 3. 四三
+     * 
+     * 四三を作るに至らない時は、できるだけ連続で石が並ぶように置く
      */
+
+    int flag_5ren = 0;
+    int flag_chouren = 0;
+    int flag_43 = 0;
+
+    // 四三を作るに至らない時のために座標を格納しておく
+    int sub_x = -1;
+    int sub_y = -1;
 
     // 盤面を走査して、自分の石の並び方を調査する
     for(int y=0; y<BOARD_SQUARE; y++){          // 縦方向
@@ -29,10 +39,6 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
             
             //printf("(%d, %d)\n", x+1, y+1);
             int stone_x_o = board[x][y];
-            int flag_5ren = 0;
-            int flag_chouren = 0;
-            int flag_43 = 0;
-
             if(stone_x_o == 0){
 
                 // 判定のために(x, y)に自分の石を置く
@@ -67,13 +73,86 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
                     board[x][y] = stone_x_o;  
                 }
             }
-            else if(stone_x_o = 1){
+            else if(stone_x_o == 1){ 
+                sub_x = x;
+                sub_y = y;
                 flag_5ren = is_5ren_mid(&x, &y, board);
                 if(flag_5ren){
                     printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
                 }
             }
-            if(flag_5ren || flag_chouren == 1 || flag_43 == 1)   break;
+            if(flag_5ren || flag_chouren || flag_43)   break;
+        }
+        if(flag_5ren || flag_chouren || flag_43)   break;
+    }
+
+    // 四三を作るに至らない時
+    // 現在自分の石が置かれている周囲に置きに行く
+    if(!flag_5ren && !flag_chouren && !flag_43){
+
+        int put_flag = 0;   // 石を置けたかどうかのフラグ
+
+        while(1){
+
+            // 周囲で空いている箇所を探す
+            // 飛び三・飛び四を作るために、変数iで隣接だけでなく1つ空きも埋めるようにする
+            int rand_num = rand() % 8;
+            int i = rand() % 2 + 1;
+
+            switch(rand_num){
+                case 0:
+                    if(board[sub_x + i][sub_y + i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 1:
+                    if(board[sub_x - i][sub_y + i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 2:
+                    if(board[sub_x + i][sub_y] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 3:
+                    if(board[sub_x + i][sub_y - i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y-i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 4:
+                    if(board[sub_x - i][sub_y - i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y-i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 5:
+                    if(board[sub_x - i][sub_y] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 6:
+                    if(board[sub_x][sub_y + i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y+i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                case 7:
+                    if(board[sub_x][sub_y - i] == 0){
+                        printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y-i+1);
+                        put_flag = 1;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            if(put_flag)    break;
+            
         }
     }
 }
