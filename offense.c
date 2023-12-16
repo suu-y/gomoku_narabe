@@ -27,29 +27,29 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
             
             if(x >= (BOARD_SQUARE*2/3) && y >= (BOARD_SQUARE*2/3))    break;
             
-            // 判定のために(x, y)に自分の石を置く
             //printf("(%d, %d)\n", x+1, y+1);
             int stone_x_o = board[x][y];
-            int flag_chouren;
-            int flag_43;
+            int flag_5ren = 0;
+            int flag_chouren = 0;
+            int flag_43 = 0;
 
             if(stone_x_o == 0){
 
+                // 判定のために(x, y)に自分の石を置く
                 board[x][y] = 1;
 
+                flag_5ren = is_5ren_edge(x, y, board);
                 flag_chouren = is_chouren(x, y, board);
                 flag_43 = is_43(x, y, board);
 
-                // 判定を行う
-    /*            
-                if(is_5ren(x, y, board)){
+                // 判定を行う           
+                if(flag_5ren){
                     printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
                     // 盤面を元の状態に戻す
                     board[x][y] = stone_x_o;                
                     break;
                 }
-                else */
-                if(flag_chouren){
+                else if(flag_chouren){
                     printf("\n長連を作れます: (%d, %d)\n", x+1, y+1);
                     // 盤面を元の状態に戻す
                     board[x][y] = stone_x_o;  
@@ -67,16 +67,272 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
                     board[x][y] = stone_x_o;  
                 }
             }
-            if(flag_chouren == 1 || flag_43 == 1)   break;
+            else if(stone_x_o = 1){
+                flag_5ren = is_5ren_mid(&x, &y, board);
+                if(flag_5ren){
+                    printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
+                }
+            }
+            if(flag_5ren || flag_chouren == 1 || flag_43 == 1)   break;
         }
     }
 }
 
-int is_5ren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
+int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     /*
      * この関数は offence 関数で呼び出され、盤面上の全ての(x, y)に対して
      * 5連があるかを判定する
+     * ただし、5連の中の石がまだ置かれていない場合のみしか判定できない
+     * 
+     * Args:
+     *  x - 探索の起点となするx座標
+     *  y - 探索の起点となするy座標
+     *  board - 現在の盤面の状態
+     * 
+     * Rtn:
+     *  0 - 入力(x, y)で5連は成立しない
+     *  1 - 入力(x, y)で5連が成立する
+     */
+
+    /*
+     * 方針: 盤面を9つのブロックに分けて、その位置から5連があり得る方向を探索する
+     * 識別のため、テンキーの数字と同じ順でブロックに番号を付けている　下
+     * 7 8 9
+     * 4 5 6
+     * 1 2 3
+     */  
+    
+    int is_5ren = 0;
+    int cnt_stone = 0;
+    int stone_x_o = board[*x][*y];
+
+    int store_x = -1;
+    int store_y = -1;
+
+    switch(*x/5){
+        case 0:
+            switch(*y/5){
+                case 0:
+                    // ７番ブロックの時、あり得るのは - | \\ の3種類
+                case 1:
+                    // 4番ブロックの時、あり得るのは - | \\ の3種類
+                    // -方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y] == 0){
+                            store_x = *x + k;
+                            store_y = *y;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    // |方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x][*y+k] == 0){
+                            store_x = *x;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    // \\方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y+k] == 0){
+                            store_x = *x + k;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    break;
+                case 2:
+                    // 1番ブロックの時、あり得るのは -
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y] == 0){
+                            store_x = *x + k;
+                            store_y = *y;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    break;
+                default:
+                    break;
+            }
+            cnt_stone = 0;
+            break;
+        case 1:
+            switch(*y/5){
+                case 0:
+                    // 8番ブロックの時、あり得るのは - | \\ / の3種類
+                case 1:
+                    // 5番ブロックの時、あり得るのは - | \\ / の3種類
+                    // -方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y] == 0){
+                            store_x = *x + k;
+                            store_y = *y;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    // |方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x][*y+k] == 0){
+                            store_x = *x;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    // \\方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y+k] == 0){
+                            store_x = *x + k;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    // /方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x-k][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x-k][*y+k] == 0){
+                            store_x = *x - k;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    break;
+                case 2:
+                    // 2番ブロックの時、あり得るのは -
+                    for(int k=0; k<5; k++){
+                        if(board[*x+k][*y] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x+k][*y] == 0){
+                            store_x = *x + k;
+                            store_y = *y;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    break;                  
+                default:
+                    break;
+            }
+            cnt_stone = 0;
+            break;
+        case 2:
+            switch(*y/5){
+                case 0:
+                    // 9番ブロックの時、あり得るのは | / の3種類
+                case 1:
+                    // 6番ブロックの時、あり得るのは | / の3種類
+                    // |方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x][*y+k] == 0){
+                            store_x = *x;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                    cnt_stone = 0;
+                    break;
+                    // / 方向
+                    for(int k=0; k<5; k++){
+                        if(board[*x-k][*y+k] == stone_x_o){
+                            cnt_stone ++;
+                        }
+                        else if(board[*x-k][*y+k] == 0){
+                            store_x = *x - k;
+                            store_y = *y + k;
+                        }
+                    }
+                    if(cnt_stone == 4){
+                        is_5ren = 1;
+                        break;
+                    }
+                default:
+                    break;
+            }
+            cnt_stone = 0;
+            break;
+        default:
+            break;
+    }
+
+    *x = store_x;
+    *y = store_y;
+
+    if(is_5ren)    return 1;
+    else    return 0;
+
+}
+
+int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
+
+    /*
+     * この関数は offence 関数で呼び出され、盤面上の全ての(x, y)に対して
+     * 5連があるかを判定する
+     * ただし、5連の端点がまだ置かれていない場合のみしか判定できない
      * 
      * Args:
      *  x - 探索の起点となするx座標
@@ -259,6 +515,9 @@ int is_5ren(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
         default:
             break;
     }
+
+    if(is_5ren)    return 1;
+    else    return 0;
 
 }
 
