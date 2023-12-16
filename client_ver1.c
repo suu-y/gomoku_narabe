@@ -110,16 +110,16 @@ int main(void) {
             {
                 board[x-1][y-1] = 3;
                 // 禁じ手のリストを作成
-                kinjite tmp;
-                tmp.p.x = x-1; tmp.p.y = y-1;
-                tmp.next = NULL;
+                kinjite *tmp=malloc(sizeof(kinjite));
+                (tmp->p).x = x-1; (tmp->p).y = y-1;
+                tmp->next = NULL;
                 if(initk==NULL)
                 {
-                    initk=&tmp;
+                    initk=tmp;
                 } else {
-                    prevk->next = &tmp;
+                    prevk->next = tmp;
                 }
-                prevk=&tmp;
+                prevk=tmp;
             } else { // 禁じ手じゃなかったらwhile文を抜ける
                 break;
             }
@@ -137,14 +137,16 @@ int main(void) {
         }*/
         
         // 自分の手の禁じ手を確認
-//        judge_kinzite(x-1, y-1, board,message);
 
         // 禁じ手リストに格納された盤面を0に戻す
-        prevk=initk;
-        while(prevk!=NULL)
+        if(!turn)
         {
-            board[(prevk->p).x][(prevk->p).y]=0;
-            prevk=prevk->next;
+            prevk=initk;
+            while(prevk!=NULL)
+            {
+                board[(prevk->p).x][(prevk->p).y]=0;
+                prevk=prevk->next;
+            }
         }
 
         // -----デバッグ用-----
