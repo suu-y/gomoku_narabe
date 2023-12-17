@@ -6,6 +6,7 @@
 #include "./judge.h"
 #include "./kachimake.h"
 #include "./defense.h"
+#include "./offense.h"
 
 // 禁じ手呼出を各関数内で行うため，その仕様に合わせてクライアントプログラムを変更(たぶん大体OK)
 // 1手目，2手目はwhile文の外で打つようにする？
@@ -90,7 +91,7 @@ int main(void) {
         judge_kinzite(x-1, y-1, board,message);
         printf("%s\n", message);
 
-        // もし中央が空いていればそこへ，空いていなければその回り8個のうちどこかに置く
+        // 初手は中央が空いていればそこへ，空いていなければその回り8個のうちどこかに置く
         if(board[7][7]==0)
         {
             // 真ん中に置く．
@@ -145,21 +146,13 @@ int main(void) {
             if(judgeDefense(board, &p))
             {
                 // 攻め : この場合は自分の手がどこにあるかを走査する必要があるため，専用の関数を呼び出す想定
-                /* テスト用---左上から走査してとにかく空いてるところに置く-- */
-                int i, j,finish=0;
-                for(i=0;i<BOARD_SQUARE;i++)
-                {
-                    for(j=0;j<BOARD_SQUARE;j++)
-                    {
-                        if(board[j][i]==0)
-                        {
-                            p.x=j;p.y=i;
-                            finish=1;
-                            break;
-                        }
-                    }
-                    if(finish) break;
-                }
+                int put_x = -1;
+                int put_y = -1;
+                offense(&put_x, &put_y, board, turn);
+                printf("次の攻め手は: (%d, %d)\n", put_x+1, put_y+1);
+
+                p.x = put_x;
+                p.y = put_y;
             }
             board[p.x][p.y] = 1;
             // 自分の手の禁じ手を確認 : 禁じ手じゃなければwhile文を抜ける
