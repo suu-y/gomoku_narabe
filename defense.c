@@ -2,6 +2,11 @@
 #include <math.h>
 #include "./defense.h"
 #include "./judge.h"
+#define _5REN  5
+#define _4REN  4
+#define _43    3
+#define _TOBI4 2
+#define _3REN  1
 
 /* 優先順位(評価値)
  * 1.5連(5)
@@ -40,7 +45,12 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
 {
     int flag = 0b00000000; // 8方向にコマがあるかを確認する．
     int i, j;
-    int directions[8] = {1}; // 8方向のコマ数を配列で格納．
+    int directions[8] = {0}; // 8方向のコマ数を配列で格納．
+
+    /* リスト構造の作成 */
+    cand *initc = NULL;
+    cand *prevc = NULL;
+
     // y方向
     for(i=0;i<BOARD_SQUARE;i++)
     {
@@ -50,7 +60,6 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
             // 何も置かれていないところを調べる
             if(board[j][i]==0)
             {
-                int cnt; // 自分を含めて何個連続してコマがあるか調べる．(削除できそう？)
                // フラグの設定
                 flag = 0b00000000; // フラグを初期化
                 if(j>0 && board[j-1][i]==2)                                 flag |= (1 << LEFT);        // 左に相手のコマ
@@ -67,8 +76,27 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                 int m;
                 for(m=0;m<8;m++) printf("direction[%d]:%d\n",m,directions[m]);
 
+                //横，縦，左斜め，右斜めに自分を入れて5個並ぶなら，そこに評価値5を与え，リストに組み込む．
+                if((directions[LEFT]+directions[RIGHT]==4) || (directions[UPPER]+directions[DOWN]==4) || 
+                    (directions[LEFT_UPPER]+directions[RIGHT_DOWN]==4) || 
+                    (directions[RIGHT_UPPER]+directions[LEFT_DOWN]==4))
+                    {
+                        addList(initc, prevc, j, i, _5REN);
+                        // 5連があった場合はこの時点で評価値最大なので，break．次のコマへ
+                        break;
+                    }
+                //横，縦，左斜め，右斜めに自分を入れて4個並ぶなら，そこに評価値4を与え，リストに組み込む．
+                if((directions[LEFT]+directions[RIGHT]==3) || (directions[UPPER]+directions[DOWN]==3) || 
+                    (directions[LEFT_UPPER]+directions[RIGHT_DOWN]==3) || 
+                    (directions[RIGHT_UPPER]+directions[LEFT_DOWN]==3))
+                    {
+                        addList(initc, prevc, j, i, _4REN);
+                        // ここに来てる時点で5連なしで4連．評価値最大なのでbreak.
+                        break;
+                    }
+
 // ------------------------------未変更--------------------------------
-                // 左方向にコマがないのでそのまま調べていく
+/*                // 左方向にコマがないのでそのまま調べていく
                 if((flag&0b0001)==0b0000)
                 {
                     cnt = countWidth(board, j,i);
@@ -219,7 +247,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
                             return 0;
                         }
                     }
-                }
+                }*/
             }
         }
     }
@@ -229,7 +257,7 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
 /* 左方向に自分を含めて相手のコマが何個並ぶか確認 */
 int countLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    int cnt = 1;
+    int cnt = 0;
     while(--x>=0 && board[x][y]==2) cnt++;
     return cnt;
 }
@@ -237,7 +265,7 @@ int countLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 /* 右方向に自分を含めて相手のコマが何個並ぶか確認 */
 int countRight(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    int cnt = 1;
+    int cnt = 0;
     while(++x<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
@@ -245,7 +273,7 @@ int countRight(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 /* 上方向に自分を含めて相手のコマが何個並ぶか確認 */
 int countUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    int cnt = 1;
+    int cnt = 0;
     while(--y>=0 && board[x][y]==2) cnt++;
     return cnt;
 }
@@ -253,7 +281,7 @@ int countUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 /* 下方向に自分を含めて相手のコマが何個並ぶか確認 */
 int countDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    int cnt = 1;
+    int cnt = 0;
     while(++y<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
@@ -261,8 +289,32 @@ int countDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 /* 左斜め上に自分を含めて相手のコマが何個並ぶか確認 */
 int countLeftUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
-    int cnt = 1;
+    int cnt = 0;
     while(--x>=0 && --y>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 右斜め下に自分を含めて相手のコマが何個並ぶか確認 */
+int countRightDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 0;
+    while(++x<BOARD_SQUARE && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 右斜め上に自分を含めて何個並ぶか確認*/
+int countRightUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 0;
+    while(++x<BOARD_SQUARE && --y>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 左斜め下に自分を含めて何個並ぶか確認*/
+int countLeftDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 0;
+    while(--x>=0 && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
 
@@ -287,28 +339,18 @@ void search8directions(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int 
         directions[LEFT_DOWN] = countLeft(board, x, y);
 }
 
-/* 右斜め下に自分を含めて相手のコマが何個並ぶか確認 */
-int countRightDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+/* 与えられた座標，評価値の値を元にリストに組み込むための関数 */
+void addList(cand *initc, cand *prevc, int x, int y, int eval)
 {
-    int cnt = 1;
-    while(++x<BOARD_SQUARE && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
-    return cnt;
-}
+    cand *tmp=malloc(sizeof(cand));
+    (tmp->p).x = x;
+    (tmp->p).y = y;
+    tmp->eval = eval;
+    tmp->next = NULL;
+    if(initc==NULL) initc=tmp;
+    else prevc->next = tmp;
 
-/* 右斜め上に自分を含めて何個並ぶか確認*/
-int countRightUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
-{
-    int cnt = 1;
-    while(++x<BOARD_SQUARE && --y>=0 && board[x][y]==2) cnt++;
-    return cnt;
-}
-
-/* 左斜め下に自分を含めて何個並ぶか確認*/
-int countLeftDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
-{
-    int cnt = 1;
-    while(--x>=0 && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
-    return cnt;
+    prevc=tmp;
 }
 
 /* 3つ連続で並んでいた時に，それを防ぐための関数

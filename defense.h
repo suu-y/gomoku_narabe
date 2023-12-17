@@ -1,13 +1,13 @@
 #define BOARD_SQUARE 15
 
 typedef struct {
-    int x; // x座標
-    int y; // y座標
+    int x; // x座�?
+    int y; // y座�?
 } place;
 
 typedef struct kinjite {
-    place p;        // 禁じ手であった座標
-    struct kinjite *next;  // リスト構造のためのポインタ
+    place p;        // 禁じ手であった座�?
+    struct kinjite *next;  // リスト構�?のためのポインタ
 } kinjite;
 
 int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p);
