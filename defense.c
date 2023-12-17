@@ -11,28 +11,6 @@
  * 5.三連(1)
 */
 
-/* -----手順メモ-----
- * 1.左上から順番に走査
- * 2.boardのうち0のところ(何も置かれていないところ)を調べる
- * 3.八方向について2のところがあれば盤面の状況を詳しく調査
- * 4.そこに2を置いた場合何個並ぶかを調べる．
- * 5.要素数8の配列を用意．各方向に何個並ぶかを保持しておく．(初期値は全て1(自分自身))
- * 6.横，縦，左斜め，右斜めのどれかが5になるなら，そこに評価値5を与え，リストに組み込む．
- * 7.どれかが4になるなら，そこに評価値4を与え，リストに組み込む．
- * 8.どれかが3になるなら，四三，飛び四，三連のどれになるかを調べる．
- * 8-1.四三：自分は三側に組み込まれている状況．(四側はそもそも4連で防げる．…はず．)連なる他の2個について，3個並んでいるところがあるかを確認．あれば四三．評価値3としてリストに組み込む
- * 8-2.飛び四：○○○(空)○の状態．右側，左側のどちらかに1つ空けてコマが置かれていれば飛び四の状態．評価値2としてリストに組み込む．
- * 8-3.三連：上記のどちらでも無ければただの三連．評価値1としてリストに組み込む．
- * 9.どれかが2になるなら，飛び四．○○(空)○○の状態．飛び三からの分岐で作れる気がする．その更に横にコマがあれば評価値2としてリストに組み込む．
- * 10.1の時(デフォルト)は，無視して大丈夫．飛び三，飛び四になる可能性はあるが，この形になっても空のところに置かれても次でふせげる…と，思う．
- * 11.すべて走査し終えたら，リストを頭から辿る．
- * 11-1.リストの頭を指すポインタがNULLなら攻めへ．
- * 11-2.評価値を比較し，評価値最大の部分を探す．評価値5のところが見つかった場合は，そこが最大なので探索を打ち切り．確定させる．
- * 
- * ちなみに上記でも軽く触れたが，飛び三は次の手の打ち方を見ていずれ防げるので，一旦無視とする．
- * リストには同じ座標を持つものが複数格納されても良い．異なる評価値で格納されれば，出力される座標は同様になる．
- */
-
 typedef struct cand
 {
     place p; // 候補地の座標を保持
@@ -42,14 +20,14 @@ typedef struct cand
 
 // 各方向がどうなるかを
 enum {
-    LEFT,               // 0
-    RIGHT,              // 1
-    UPPER,              // 2
-    DOWN,               // 3
-    LEFT_UPPER,         // 4
-    LEFT_DOWN,          // 5
-    RIGHT_UPPER,        // 6
-    RIGHT_DOWN          // 7
+    LEFT,               // 0(左)
+    RIGHT,              // 1(右)
+    UPPER,              // 2(上)
+    DOWN,               // 3(下)
+    LEFT_UPPER,         // 4(左上)
+    RIGHT_DOWN,         // 5(右下)
+    RIGHT_UPPER,        // 6(右上)
+    LEFT_DOWN           // 7(左下)
 };
 
 /* 守りに徹するべきか，攻めに転じるべきかを判定
@@ -60,34 +38,36 @@ enum {
  */
 int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
 {
-    int flag = 0b0000; // 左、上、左上、右上にコマが存在するかを管理する．
-    // 左上から順に走査していき、相手の碁が何個並ぶかを判定
-    // 仮に3個並んでる or 飛び三の場合には守るべきだと仮定
-    // 例えば，在る座標(x,y)で横並びをn個発見した場合は，次に調べるところは(x+n, y)で良いので，これにより計算量を小さくする
-    // これを上記のビットを使って考えると，以下のようになる
-    /* 0b0001の時は左にあるので，横方向の判定は不要．
-     * 0b0010の時は上にあるので，縦方向の判定は不要．
-     * 0b0100の時は左上にあるので，右斜め下方向の判定は不要
-     * 0b1000の時は右上にあるので，左斜め下方向の判定は不要
-    */
+    int flag = 0b00000000; // 8方向にコマがあるかを確認する．
     int i, j;
+    int directions[8] = {1}; // 8方向のコマ数を配列で格納．
     // y方向
     for(i=0;i<BOARD_SQUARE;i++)
     {
         // x方向
         for(j=0;j<BOARD_SQUARE;j++)
         {
-            // 相手のコマが置かれていた場合のみ調べる
-            if(board[j][i]==2)
+            // 何も置かれていないところを調べる
+            if(board[j][i]==0)
             {
-                int cnt; // 自分を含めて何個連続してコマがあるか調べる．
+                int cnt; // 自分を含めて何個連続してコマがあるか調べる．(削除できそう？)
                // フラグの設定
-                int flag = 0b0000; // フラグを初期化
-                if(j>0 && board[j-1][i]==2) flag |= 1 << LEFT; // 左に相手のコマ
-                if(i>0 && board[j][i-1]==2) flag |= 1 << UPPER; // 上に相手のコマ
-                if(j>0 && i>0 && board[j-1][i-1]==2) flag |= 1 << LEFT_UPPER; // 左上に相手のコマ
-                if(j<BOARD_SQUARE-1 && i>0 && board[j+1][i-1]==2) flag |= 1 << RIGHT_UPPER; // 右上に相手のコマ
+                flag = 0b00000000; // フラグを初期化
+                if(j>0 && board[j-1][i]==2)                                 flag |= (1 << LEFT);        // 左に相手のコマ
+                if(j<BOARD_SQUARE-1 && board[j+1][i]==2)                    flag |= (1 << RIGHT);       // 右に相手のコマ
+                if(i>0 && board[j][i-1]==2)                                 flag |= (1 << UPPER);       // 上に相手のコマ
+                if(i<BOARD_SQUARE-1 && board[j][i+1]==2)                    flag |= (1 << DOWN);        // 下に相手のコマ
+                if(j>0 && i>0 && board[j-1][i-1]==2)                        flag |= (1 << LEFT_UPPER);  // 左上に相手のコマ
+                if(j<BOARD_SQUARE-1 && i<BOARD_SQUARE-1 && board[j+1][i+1]) flag |= (1 << RIGHT_DOWN);  // 右下に相手のコマ
+                if(j<BOARD_SQUARE-1 && i>0 && board[j+1][i-1]==2)           flag |= (1 << RIGHT_UPPER); // 右上に相手のコマ
+                if(j>0 && i<BOARD_SQUARE-1 && board[j-1][i+1]==2)           flag |= (1 << LEFT_DOWN);   // 左下に相手のコマ
             
+                search8directions(board,j,i,flag,directions);
+                /* デバッグ用 */
+                int m;
+                for(m=0;m<8;m++) printf("direction[%d]:%d\n",m,directions[m]);
+
+// ------------------------------未変更--------------------------------
                 // 左方向にコマがないのでそのまま調べていく
                 if((flag&0b0001)==0b0000)
                 {
@@ -246,32 +226,85 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
     return 1;
 }
 
-/* (右方向)横に自分を含めて相手のコマが何個並ぶか確認 */
-int countWidth(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+/* 左方向に自分を含めて相手のコマが何個並ぶか確認 */
+int countLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 1;
+    while(--x>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 右方向に自分を含めて相手のコマが何個並ぶか確認 */
+int countRight(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
     int cnt = 1;
     while(++x<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
 
-/* (下方向)縦に自分を含めて相手のコマが何個並ぶか確認 */
-int countVertical(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+/* 上方向に自分を含めて相手のコマが何個並ぶか確認 */
+int countUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 1;
+    while(--y>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 下方向に自分を含めて相手のコマが何個並ぶか確認 */
+int countDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
     int cnt = 1;
     while(++y<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
 
+/* 左斜め上に自分を含めて相手のコマが何個並ぶか確認 */
+int countLeftUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 1;
+    while(--x>=0 && --y>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
+/* 8方向にそれぞれコマが何個並ぶかをカウントして，配列に格納する． */
+void search8directions(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int flag, int directions[8])
+{
+    if(flag & (1 << LEFT) == (1 << LEFT)) // 左方向にコマあり
+        directions[LEFT] = countLeft(board, x, y);
+    if(flag & (1 << RIGHT) == (1 << RIGHT)) // 右方向にコマあり
+        directions[RIGHT] = countLeft(board, x, y);
+    if(flag & (1 << UPPER) == (1 << UPPER)) // 上方向にコマあり
+        directions[UPPER] = countLeft(board, x, y);
+    if(flag & (1 << DOWN) == (1 << DOWN)) // 下方向にコマあり
+        directions[DOWN] = countLeft(board, x, y);
+    if(flag & (1 << LEFT_UPPER) == (1 << LEFT_UPPER)) // 左上方向にコマあり
+        directions[LEFT_UPPER] = countLeft(board, x, y);
+    if(flag & (1 << RIGHT_DOWN) == (1 << RIGHT_DOWN)) // 右下方向にコマあり
+        directions[RIGHT_DOWN] = countLeft(board, x, y);
+    if(flag & (1 << RIGHT_UPPER) == (1 << RIGHT_UPPER)) // 右上方向にコマあり
+        directions[RIGHT_UPPER] = countLeft(board, x, y);
+    if(flag & (1 << LEFT_DOWN) == (1 << LEFT_DOWN)) // 左下方向にコマあり
+        directions[LEFT_DOWN] = countLeft(board, x, y);
+}
+
 /* 右斜め下に自分を含めて相手のコマが何個並ぶか確認 */
-int countDiagonallyLowerRight(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+int countRightDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
     int cnt = 1;
     while(++x<BOARD_SQUARE && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
     return cnt;
 }
 
+/* 右斜め上に自分を含めて何個並ぶか確認*/
+int countRightUpper(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+{
+    int cnt = 1;
+    while(++x<BOARD_SQUARE && --y>=0 && board[x][y]==2) cnt++;
+    return cnt;
+}
+
 /* 左斜め下に自分を含めて何個並ぶか確認*/
-int countDiagonallyLowerLeft(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
+int countLeftDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
 {
     int cnt = 1;
     while(--x>=0 && ++y<BOARD_SQUARE && board[x][y]==2) cnt++;
@@ -407,6 +440,7 @@ void defense4ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, 
 /* 在る座標(x,y)から中心の座標(BOARD_SQUARE/2, BOARD_SQUARE/2)までの距離を計算．
  * ユークリッド距離を用いると2乗計算，平方計算等が必要になってしまうため，マンハッタン距離で計算を行う
  */
+
 int calculateDistance(int x, int y)
 {
     return abs(x-BOARD_SQUARE/2)+abs(y-BOARD_SQUARE/2);
