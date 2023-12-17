@@ -6,12 +6,17 @@
 #include "./offense.h"
 
 // 攻め・守り判定関数の返り値を受けて、攻め関数offense()が呼び出される
-// TODO: 引数(x, y)は呼び出されることを想定して**ポインタ**で
-void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
+void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int flag_first_second){
 
     // TODO: 序盤とか、まだ石の数が足らない等で四三を作るに至らない時の石を置く基準を検討する
 
     /*
+     * Args:
+     *  *x - 次に置く位置となるx座標
+     *  *y - 次に置く位置となるy座標
+     *  board - 現在の盤面
+     *  flag_first_second - この関数を呼び出したのかは先手か(0)後手か(1)
+     * 
      * 【方針】
      * - 四三を作りに行く
      * 
@@ -52,25 +57,34 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
                 if(flag_5ren){
                     printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
                     // 盤面を元の状態に戻す
-                    board[x][y] = stone_x_o;                
+                    board[x][y] = stone_x_o;
+                    // この座標をポインタで返す
+                    *arg_x = x;
+                    *arg_y = y;                
                     break;
                 }
                 else if(flag_chouren){
                     printf("\n長連を作れます: (%d, %d)\n", x+1, y+1);
                     // 盤面を元の状態に戻す
-                    board[x][y] = stone_x_o;  
+                    board[x][y] = stone_x_o;
+                    // この座標をポインタで返す
+                    *arg_x = x;
+                    *arg_y = y;   
                     break;
                 }
                 else if(flag_43){
                     printf("\n四三を作れます: (%d, %d)\n", x+1, y+1);
                     // 盤面を元の状態に戻す
-                    board[x][y] = stone_x_o;  
+                    board[x][y] = stone_x_o;
+                    // この座標をポインタで返す
+                    *arg_x = x;
+                    *arg_y = y;
                     break;
                 }
                 else{
                     // 盤面を元の状態に戻す
                     // この時、盤面の探索は続けたいのでbreakしない
-                    board[x][y] = stone_x_o;  
+                    board[x][y] = stone_x_o; 
                 }
             }
             else if(stone_x_o == 1){ 
@@ -81,6 +95,9 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
                     printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
                 }
             }
+            // この座標をポインタで返す
+            *arg_x = x;
+            *arg_y = y;  
             if(flag_5ren || flag_chouren || flag_43)   break;
         }
         if(flag_5ren || flag_chouren || flag_43)   break;
@@ -103,48 +120,64 @@ void offense(int board[BOARD_SQUARE][BOARD_SQUARE]){
                 case 0:
                     if(board[sub_x + i][sub_y + i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+i+1);
+                        *arg_x = sub_x + i;
+                        *arg_y = sub_y + i;
                         put_flag = 1;
                     }
                     break;
                 case 1:
                     if(board[sub_x - i][sub_y + i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+i+1);
+                        *arg_x = sub_x - i;
+                        *arg_y = sub_y + i;
                         put_flag = 1;
                     }
                     break;
                 case 2:
                     if(board[sub_x + i][sub_y] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+1);
+                        *arg_x = sub_x + i;
+                        *arg_y = sub_y;
                         put_flag = 1;
                     }
                     break;
                 case 3:
                     if(board[sub_x + i][sub_y - i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y-i+1);
+                        *arg_x = sub_x + i;
+                        *arg_y = sub_y - i;
                         put_flag = 1;
                     }
                     break;
                 case 4:
                     if(board[sub_x - i][sub_y - i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y-i+1);
+                        *arg_x = sub_x - i;
+                        *arg_y = sub_y - i;
                         put_flag = 1;
                     }
                     break;
                 case 5:
                     if(board[sub_x - i][sub_y] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+1);
+                        *arg_x = sub_x - i;
+                        *arg_y = sub_y;
                         put_flag = 1;
                     }
                     break;
                 case 6:
                     if(board[sub_x][sub_y + i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y+i+1);
+                        *arg_x = sub_x;
+                        *arg_y = sub_y + i;
                         put_flag = 1;
                     }
                     break;
                 case 7:
                     if(board[sub_x][sub_y - i] == 0){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y-i+1);
+                        *arg_x = sub_x;
+                        *arg_y = sub_y - i;
                         put_flag = 1;
                     }
                     break;
