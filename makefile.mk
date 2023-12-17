@@ -5,8 +5,8 @@ client: client_ver1.o kachimake.o kinzite.o defense.o offense.o
 	gcc -o client client_ver1.o kachimake.o kinzite.o defense.o offense.o -lws2_32
 client_ver1.o: client_ver1.c
 	gcc -I include -c client_ver1.c -o client_ver1.o -fexec-charset=CP932
-client_auto: client_auto.o kachimake.o kinzite.o defense.o
-	gcc -o client_auto client_auto.o kachimake.o kinzite.o defense.o -lws2_32
+client_auto: client_auto.o kachimake.o kinzite.o defense.o offense.o
+	gcc -o client_auto client_auto.o kachimake.o kinzite.o defense.o offense.o -lws2_32
 client_auto.o: client_auto.c
 	gcc -I include -c client_auto.c -o client_auto.o -fexec-charset=CP932
 kachimake.o: kachimake.c
