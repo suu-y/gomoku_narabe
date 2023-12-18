@@ -3,6 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 #include "./offense.h"
 
 // 攻め・守り判定関数の返り値を受けて、攻め関数offense()が呼び出される
@@ -35,8 +36,6 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
     // 四三を作るに至らない時のために座標を格納しておく
     int sub_x = -1;
     int sub_y = -1;
-
-    // 先手の時は禁じ手判定あり、後手は禁じ手判定無し（長連に対する挙動）
 
     // 盤面を走査して、自分の石の並び方を調査する
     for(int y=0; y<BOARD_SQUARE; y++){          // 縦方向
@@ -117,6 +116,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
 
             // 周囲で空いている箇所を探す
             // 飛び三・飛び四を作るために、変数iで隣接だけでなく1つ空きも埋めるようにする
+            srand((unsigned int) time(NULL));
             int rand_num = rand() % 8;
             int i = rand() % 2 + 1;
 
@@ -484,6 +484,7 @@ int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         if(board[x+k][y] == stone_x_o){
                             cnt_stone ++;
                         }
+                        else break;
                     }
                     if(cnt_stone == 5){
                         is_5ren = 1;
@@ -495,6 +496,7 @@ int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         if(board[x][y+k] == stone_x_o){
                             cnt_stone ++;
                         }
+                        else break;
                     }
                     if(cnt_stone == 5){
                         is_5ren = 1;
@@ -506,6 +508,7 @@ int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         if(board[x+k][y+k] == stone_x_o){
                             cnt_stone ++;
                         }
+                        else break;
                     }
                     if(cnt_stone == 5){
                         is_5ren = 1;
@@ -519,6 +522,7 @@ int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         if(board[x+k][y] == stone_x_o){
                             cnt_stone ++;
                         }
+                        else break;
                     }
                     if(cnt_stone == 5){
                         is_5ren = 1;
