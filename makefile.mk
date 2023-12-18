@@ -1,10 +1,10 @@
-# makefile for client_auto and client_ver1.c and kachimake.c kinzite.c
+# makefile for client_auto and client_ver2.c and kachimake.c kinzite.c
 # copy this command: mingw32-make -f makefile.mk
 all: client client_auto
-client: client_ver1.o kachimake.o kinzite.o defense.o offense.o
-	gcc -o client client_ver1.o kachimake.o kinzite.o defense.o offense.o -lws2_32
-client_ver1.o: client_ver1.c
-	gcc -I include -c client_ver1.c -o client_ver1.o -fexec-charset=CP932
+client: client_ver2.o kachimake.o kinzite.o defense.o offense.o
+	gcc -o client client_ver2.o kachimake.o kinzite.o defense.o offense.o -lws2_32
+client_ver2.o: client_ver2.c
+	gcc -I include -c client_ver2.c -o client_ver2.o -fexec-charset=CP932
 client_auto: client_auto.o kachimake.o kinzite.o defense.o
 	gcc -o client_auto client_auto.o kachimake.o kinzite.o defense.o -lws2_32
 client_auto.o: client_auto.c
