@@ -36,6 +36,8 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
     int sub_x = -1;
     int sub_y = -1;
 
+    // 先手の時は禁じ手判定あり、後手は禁じ手判定無し（長連に対する挙動）
+
     // 盤面を走査して、自分の石の並び方を調査する
     for(int y=0; y<BOARD_SQUARE; y++){          // 縦方向
         for(int x=0; x<BOARD_SQUARE; x++){      // 横方向
@@ -50,7 +52,9 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                 board[x][y] = 1;
 
                 flag_5ren = is_5ren_edge(x, y, board);
-                flag_chouren = is_chouren(x, y, board);
+                if(flag_first_second == 1){     // 後手の時のみ長連を打てる
+                    flag_chouren = is_chouren(x, y, board);
+                }
                 flag_43 = is_43(x, y, board);
 
                 // 判定を行う           
