@@ -95,7 +95,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                 sub_y = y;
                 flag_5ren = is_5ren_mid(&x, &y, board);
                 if(flag_5ren){
-                    printf("\n5連を作れます: (%d, %d)\n", x+1, y+1);
+                    printf("\n5連を作れます(is_5ren_mid): (%d, %d)\n", x+1, y+1);
                 }
             }
             // この座標をポインタで返す
@@ -213,13 +213,14 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     /*
      * 方針: 盤面を9つのブロックに分けて、その位置から5連があり得る方向を探索する
-     * 識別のため、テンキーの数字と同じ順でブロックに番号を付けている　下
+     * 識別のため、テンキーの数字と同じ順でブロックに番号を付けている↓
      * 7 8 9
      * 4 5 6
      * 1 2 3
      */  
     
     int is_5ren = 0;
+    int is_empty = 0;   // 5連となる箇所が空の時は真、埋まっていると偽
     int cnt_stone = 0;
     int stone_x_o = board[*x][*y];
 
@@ -241,13 +242,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y] == 0){
                             store_x = *x + k;
                             store_y = *y;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     // |方向
                     for(int k=0; k<5; k++){
                         if(board[*x][*y+k] == stone_x_o){
@@ -256,13 +259,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x][*y+k] == 0){
                             store_x = *x;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     // \\方向
                     for(int k=0; k<5; k++){
                         if(board[*x+k][*y+k] == stone_x_o){
@@ -271,13 +276,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y+k] == 0){
                             store_x = *x + k;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     break;
                 case 2:
                     // 1番ブロックの時、あり得るのは -
@@ -288,18 +295,21 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y] == 0){
                             store_x = *x + k;
                             store_y = *y;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     break;
                 default:
                     break;
             }
             cnt_stone = 0;
+            is_empty = 0;
             break;
         case 1:
             switch(*y/5){
@@ -315,13 +325,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y] == 0){
                             store_x = *x + k;
                             store_y = *y;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     // |方向
                     for(int k=0; k<5; k++){
                         if(board[*x][*y+k] == stone_x_o){
@@ -330,13 +342,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x][*y+k] == 0){
                             store_x = *x;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     // \\方向
                     for(int k=0; k<5; k++){
                         if(board[*x+k][*y+k] == stone_x_o){
@@ -345,13 +359,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y+k] == 0){
                             store_x = *x + k;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     // /方向
                     for(int k=0; k<5; k++){
                         if(board[*x-k][*y+k] == stone_x_o){
@@ -360,13 +376,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x-k][*y+k] == 0){
                             store_x = *x - k;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     break;
                 case 2:
                     // 2番ブロックの時、あり得るのは -
@@ -377,18 +395,21 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x+k][*y] == 0){
                             store_x = *x + k;
                             store_y = *y;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     break;                  
                 default:
                     break;
             }
             cnt_stone = 0;
+            is_empty = 0;
             break;
         case 2:
             switch(*y/5){
@@ -404,13 +425,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x][*y+k] == 0){
                             store_x = *x;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
                     cnt_stone = 0;
+                    is_empty = 0;
                     break;
                     // / 方向
                     for(int k=0; k<5; k++){
@@ -420,9 +443,10 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                         else if(board[*x-k][*y+k] == 0){
                             store_x = *x - k;
                             store_y = *y + k;
+                            is_empty = 1;
                         }
                     }
-                    if(cnt_stone == 4){
+                    if(cnt_stone == 4 && is_empty){
                         is_5ren = 1;
                         break;
                     }
@@ -430,6 +454,7 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
                     break;
             }
             cnt_stone = 0;
+            is_empty = 0;
             break;
         default:
             break;
