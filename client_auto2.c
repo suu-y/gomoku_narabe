@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <winsock2.h>
-#include "./judge.h"
+#include "./kinzite.h"
 #include "./kachimake.h"
 #include "./defense.h"
 #include "./offense.h"

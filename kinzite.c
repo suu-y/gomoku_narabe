@@ -3,7 +3,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include "./judge.h"
+#include "./kinzite.h"
 
 
 int judge_kinzite(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE], char *message){
