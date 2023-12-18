@@ -61,193 +61,42 @@ int judgeDefense(int board[BOARD_SQUARE][BOARD_SQUARE], place *p)
             if(board[j][i]==0)
             {
                // フラグの設定
-                flag = 0b00000000; // フラグを初期化
-                if(j>0 && board[j-1][i]==2)                                 flag |= (1 << LEFT);        // 左に相手のコマ
-                if(j<BOARD_SQUARE-1 && board[j+1][i]==2)                    flag |= (1 << RIGHT);       // 右に相手のコマ
-                if(i>0 && board[j][i-1]==2)                                 flag |= (1 << UPPER);       // 上に相手のコマ
-                if(i<BOARD_SQUARE-1 && board[j][i+1]==2)                    flag |= (1 << DOWN);        // 下に相手のコマ
-                if(j>0 && i>0 && board[j-1][i-1]==2)                        flag |= (1 << LEFT_UPPER);  // 左上に相手のコマ
-                if(j<BOARD_SQUARE-1 && i<BOARD_SQUARE-1 && board[j+1][i+1]) flag |= (1 << RIGHT_DOWN);  // 右下に相手のコマ
-                if(j<BOARD_SQUARE-1 && i>0 && board[j+1][i-1]==2)           flag |= (1 << RIGHT_UPPER); // 右上に相手のコマ
-                if(j>0 && i<BOARD_SQUARE-1 && board[j-1][i+1]==2)           flag |= (1 << LEFT_DOWN);   // 左下に相手のコマ
+               setFlag(board, j, i, &flag);
             
                 search8directions(board,j,i,flag,directions);
-                /* デバッグ用 */
-                int m;
-                for(m=0;m<8;m++) printf("direction[%d]:%d\n",m,directions[m]);
 
-                //横，縦，左斜め，右斜めに自分を入れて5個並ぶなら，そこに評価値5を与え，リストに組み込む．
-                if((directions[LEFT]+directions[RIGHT]==4) || (directions[UPPER]+directions[DOWN]==4) || 
-                    (directions[LEFT_UPPER]+directions[RIGHT_DOWN]==4) || 
-                    (directions[RIGHT_UPPER]+directions[LEFT_DOWN]==4))
-                    {
-                        addList(initc, prevc, j, i, _5REN);
-                        // 5連があった場合はこの時点で評価値最大なので，break．次のコマへ
-                        break;
-                    }
+                //横，縦，左斜め，右斜めに自分を入れて5個並ぶなら，そこに評価値5を与え，リストに組み込む．(長連あがりもここで封じる)
+                if((directions[LEFT]+directions[RIGHT]>=4) || (directions[UPPER]+directions[DOWN]>=4) || 
+                    (directions[LEFT_UPPER]+directions[RIGHT_DOWN]>=4) || 
+                    (directions[RIGHT_UPPER]+directions[LEFT_DOWN]>=4))
+                {
+                    addList(initc, prevc, j, i, _5REN);
+                    // 5連があった場合はこの時点で評価値最大なので次のコマへ
+                    continue;
+                }
+
                 //横，縦，左斜め，右斜めに自分を入れて4個並ぶなら，そこに評価値4を与え，リストに組み込む．
                 if((directions[LEFT]+directions[RIGHT]==3) || (directions[UPPER]+directions[DOWN]==3) || 
                     (directions[LEFT_UPPER]+directions[RIGHT_DOWN]==3) || 
                     (directions[RIGHT_UPPER]+directions[LEFT_DOWN]==3))
-                    {
-                        addList(initc, prevc, j, i, _4REN);
-                        // ここに来てる時点で5連なしで4連．評価値最大なのでbreak.
-                        break;
-                    }
-
-// ------------------------------未変更--------------------------------
-/*                // 左方向にコマがないのでそのまま調べていく
-                if((flag&0b0001)==0b0000)
                 {
-                    cnt = countWidth(board, j,i);
-                    // 4個の場合(3個の後に発生する可能性あり)
-                    if(cnt==4 &&
-                        ((j-1>=0 && board[j-1][i]==0) || (j+4<BOARD_SQUARE && board[j+4][i]==0)))
-                    {
-                        defense4ren(board, j, i, p, 0);
-                        if(p->x>=0 && p->y>=0) return 0;
-                    }
-                    // 3個の場合，守りに徹するので結果を返す
-                    else if(cnt==3 && 
-                        ((j-1>=0 && board[j-1][i]==0) || (j+3<BOARD_SQUARE && board[j+3][i]==0)))
-                    {
-                        // 置く場所を決める
-                        defense3ren(board, j, i, p, 0);
-                        return 0;
-                    }
-                    // 2個の場合，飛び三の場合を考える
-                    else if(cnt == 2)
-                    {
-                        // j, iの位置から右に並んでいる、すなわちboard[j][i]とboard[j+1][i]に在る状態
-                        // したがって、飛び三の場合はboard[j-2][i]の時かboard[j+3][i]の時
-                        if(j-2>=0 && board[j-2][i]==2 && board[j-1][i]==0) // ○(空)(i,j->)○○
-                        {
-                            // 間(board[j-1][i]に置く)
-                            p->x=j-1; p->y=i;
-                            return 0;
-                        } else if(j+3<BOARD_SQUARE && board[j+3][i]==2 && board[j+2][i]==0) { // (i,j->)○○(空)○
-                            // 間(board[j+2][i]に置く)
-                            p->x=j+2; p->y=i;
-                            return 0;
-                        }
-                    }
+                    addList(initc, prevc, j, i, _4REN);
+                    // ここに来てる時点で5連なしで4連．評価値最大なので次のコマへ.
+                    continue;
                 }
-
-                // 上方向にコマが無いので，そのまま調べる
-                if((flag&0b0010)==0b0000)
+                //横，縦，左斜め，右斜めに自分を入れて3個並ぶ
+                if((directions[LEFT]+directions[RIGHT]==2) || (directions[UPPER]+directions[DOWN]==2) || 
+                    (directions[LEFT_UPPER]+directions[RIGHT_DOWN]==2) || 
+                    (directions[RIGHT_UPPER]+directions[LEFT_DOWN]==2))
                 {
-                    cnt = countVertical(board, j,i);
-                    // 4個の場合(3個の後に発生する可能性あり)
-                    if(cnt==4 &&
-                        ((i-1>=0 && board[j][i-1]==0) || (i+4<BOARD_SQUARE && board[j][i+4]==0)))
+                    // 四三，飛び四，三連のどれか
+                    if(is43)
                     {
-                        defense4ren(board, j, i, p, 1);
-                        if(p->x>=0 && p->y>=0) return 0;
-                    }
-                    // 3個の場合，守りに徹するので結果を返す
-                    else if(cnt==3 && 
-                        ((i-1>=0 && board[j][i-1]==0) || (i+3<BOARD_SQUARE && board[j][i+3]==0)))
-                    {
-                        // 置く場所を決める
-                        defense3ren(board, j, i, p, 1);
-                        return 0;
-                    }
-                    // 2個の場合，飛び三の場合を考える
-                    else if(cnt == 2)
-                    {
-                        // j, iの位置から下に並んでいる、すなわちboard[j][i]とboard[j][i+1]に在る状態
-                        // したがって、飛び三の場合はboard[j][i-2]の時かboard[j][i+3]の時
-                        if(i-2>=0 && board[j][i-2]==2 && board[j][i-1]==0)
-                        {
-                            // 間(board[j][i-1]に置く)
-                            p->x=j; p->y=i-1;
-                            return 0;
-                        } else if(i+3<BOARD_SQUARE && board[j][i+3]==2 && board[j][i+2]==0) {
-                            // 間(board[j][i+2]に置く)
-                            p->x=j; p->y=i+2;
-                            return 0;
-                        }
-                    }
+                        addList(initc, prevc, j, i, _43);
+                        continue;
+                    } else if(isTobi4(board,j,i,directions)) addList(initc, prevc,j,i,_TOBI4);
+                    else addList(initc,prevc,j,i,_3REN); 
                 }
-
-                // 左上方向に相手のコマがないので，そのまま調べる
-                if((flag&0b0100)==0b0000)
-                {
-                    cnt = countDiagonallyLowerRight(board, j,i);
-                    // 4個の場合(3個の後に発生する可能性あり)
-                    if(cnt==4 &&
-                        ((j-1>=0 && i-1>=0 && board[j-1][i-1]==0) ||
-                            (j+4<BOARD_SQUARE && i+4<BOARD_SQUARE && board[j+4][i+4]==0)))
-                    {
-                        defense4ren(board, j, i, p, 2);
-                        if(p->x>=0 && p->y>=0) return 0;
-                    }
-                    // 3個の場合，守りに徹するので結果を返す
-                    else if(cnt==3 && 
-                        ((j-1>=0 && i-1>=0 && board[j-1][i-1]==0) || 
-                            (j+3<BOARD_SQUARE && i+3<BOARD_SQUARE && board[j+3][i+3]==0)))
-                    {
-                        // 置く場所を決める
-                        defense3ren(board, j, i, p, 2);
-                        return 0;
-                    }
-                    // 2個の場合，飛び三の場合を考える
-                    else if(cnt == 2)
-                    {
-                        // j, iの位置から右下に並んでいる、すなわちboard[j][i]とboard[j+1][i+1]に在る状態
-                        // したがって、飛び三の場合はboard[j-2][i-2]の時かboard[j+3][i+3]の時
-                        if(j-2>=0 && i-2>=0 && board[j-2][i-2]==2 && board[j-1][i-1]==0)
-                        {
-                            // 間(board[j-1][i-1]に置く)
-                            p->x=j-1; p->y=i-1;
-                            return 0;
-                        } else if(j+3<BOARD_SQUARE && i+3<BOARD_SQUARE && 
-                                    board[j+3][i+3]==2 && board[j+2][i+2]==0) {
-                            // 間(board[j+2][i+2]に置く)
-                            p->x=j+2; p->y=i+2;
-                            return 0;
-                        }
-                    }
-                }
-
-                // 右上に相手のコマがないので，そのまま調べる
-                if((flag&0b1000)==0b0000)
-                {
-                    cnt = countDiagonallyLowerLeft(board, j,i);
-                    // 4個の場合(3個の後に発生する可能性あり)
-                    if(cnt==4 &&
-                        ((j+1<BOARD_SQUARE && i-1>=0 && board[j+1][i-1]==0) ||
-                            (j-4>=0 && i+4<BOARD_SQUARE && board[j-4][i+4]==0)))
-                    {
-                        defense4ren(board, j, i, p, 3);
-                        if(p->x>=0 && p->y>=0) return 0;
-                    }
-                    // 3個の場合，守りに徹するので結果を返す
-                    else if(cnt==3 &&
-                        ((j+1<BOARD_SQUARE && i-1>=0 && board[j+1][i-1]==0) ||
-                            (j-3>=0 && i+3<BOARD_SQUARE && board[j-3][i+3]==0)))
-                    {
-                        // 置く場所を決める
-                        defense3ren(board, j, i, p, 3);
-                        return 0;
-                    }
-                    // 2個の場合，飛び三の場合を考える
-                    else if(cnt == 2)
-                    {
-                        // j, iの位置から左下に並んでいる、すなわちboard[j][i]とboard[j-1][i+1]に在る状態
-                        // したがって、飛び三の場合はboard[j+2][i-2]の時かboard[j-3][i+3]の時
-                        if(j+2<BOARD_SQUARE && i-2>=0 && board[j+2][i-2]==2 && board[j+1][i-1]==0)
-                        {
-                            // 間(board[j+1][i-1]に置く)
-                            p->x=j+1; p->y=i-1;
-                            return 0;
-                        } else if(j-3>=0 && i+3<BOARD_SQUARE && board[j-3][i+3]==2 && board[j-2][i+2]==0) {
-                            // 間(board[j-2][i+2]に置く)
-                            p->x=j-2; p->y=i+2;
-                            return 0;
-                        }
-                    }
-                }*/
             }
         }
     }
@@ -318,6 +167,20 @@ int countLeftDown(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y)
     return cnt;
 }
 
+/* フラグをセットする */
+void setFlag(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int *flag)
+{
+    *flag = 0b00000000; // フラグを初期化
+    if(x>0 && board[x-1][y]==2)                                 *flag |= (1 << LEFT);        // 左に相手のコマ
+    if(x<BOARD_SQUARE-1 && board[x+1][y]==2)                    *flag |= (1 << RIGHT);       // 右に相手のコマ
+    if(y>0 && board[x][y-1]==2)                                 *flag |= (1 << UPPER);       // 上に相手のコマ
+    if(y<BOARD_SQUARE-1 && board[x][y+1]==2)                    *flag |= (1 << DOWN);        // 下に相手のコマ
+    if(x>0 && y>0 && board[x-1][y-1]==2)                        *flag |= (1 << LEFT_UPPER);  // 左上に相手のコマ
+    if(x<BOARD_SQUARE-1 && y<BOARD_SQUARE-1 && board[x+1][y+1]) *flag |= (1 << RIGHT_DOWN);  // 右下に相手のコマ
+    if(x<BOARD_SQUARE-1 && y>0 && board[x+1][y-1]==2)           *flag |= (1 << RIGHT_UPPER); // 右上に相手のコマ
+    if(x>0 && y<BOARD_SQUARE-1 && board[x-1][y+1]==2)           *flag |= (1 << LEFT_DOWN);   // 左下に相手のコマ
+}
+
 /* 8方向にそれぞれコマが何個並ぶかをカウントして，配列に格納する． */
 void search8directions(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int flag, int directions[8])
 {
@@ -353,137 +216,126 @@ void addList(cand *initc, cand *prevc, int x, int y, int eval)
     prevc=tmp;
 }
 
-/* 3つ連続で並んでいた時に，それを防ぐための関数
- * どの方向に並んでいたとしても，盤は中央から外側に向かって展開していくことが多いと予測できるため，より中央に近い場所に置くようにする
- * x,y  : 相手の並び方を確認した座標の位置(そこから右or下or右下or左下に3つ並んでいる状態)
- * p    : 座標を格納する構造体へのポインタ
- * mode : 右，下，右下，左下どちらの方向に並んでいるかを制御する．
- *        0:右方向，1:下方向，2:右下方向，3:左下方向とする 
- */
-void defense3ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode)
+// 3個並ぶ時に，四三になるか調べる
+int is43(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int directions[8])
 {
-    int dist1=1000, dist2=1000;
-    switch(mode)
+    int flag2;
+    int directions2[8] = {0};
+    /* 3個の並び方は以下の通り(●がx,yの位置)
+     * ●○○, ○●○, ○○●
+     * 四三で四側は四連で防げるはずなので，ここでは3側に組み込まれていると想定
+     * 全パターンについて,4つ並ぶ箇所があるかを確認する．
+     */
+    if(directions[LEFT]+directions[RIGHT]==2) // 横並び
     {
-        case 0: // 右方向に3つ
-            // 今の場所から1つ左●○(<-x,y)○○か，3つ右(x,y->)○○○●に置くことになる
-            if(x-1>=0 && board[x-1][y]==0) dist1=calculateDistance(x-1, y);
-            if(x+3<BOARD_SQUARE && board[x+3][y]==0) dist2=calculateDistance(x+3, y);
-            if(dist1<=dist2) // 1つ左の方が中心に近い
-            {
-                p->x=x-1; p->y=y;
-            } else {
-                p->x=x+3; p->y=y;
-            }
-            break;
+        if(directions[LEFT]&&directions[RIGHT]) // ○●○
+        {
+            // 左のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x-1, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x-1,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
 
-        case 1: // 下方向に3つ
-            // 今の場所から1つ上●○(<-x,y)○○か，3つ下(x,y->)○○○●に置くことになる
-            if(y-1>=0 && board[x][y-1]==0) dist1=calculateDistance(x, y-1);
-            if(y+3<BOARD_SQUARE && board[x][y+3]==0) dist2=calculateDistance(x, y+3);
-            if(dist1<=dist2) // 1つ上の方が中心に近い
-            {
-                p->x=x; p->y=y-1;
-            } else {
-                p->x=x; p->y=y+3;
-            }
-            break;
+            // 右のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x+1, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x+1,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
+        } else if(directions[LEFT]) { // ○○●
+            // 1つ左のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x-1, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x-1,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
 
-        case 2: // 右下に3つ
-            // 今の場所から1つ左上●○(<-x,y)○○か，3つ右下(x,y->)○○○●に置くことになる
-            if(x-1>=0 && y-1>=0 && board[x-1][y-1]==0) dist1=calculateDistance(x-1, y-1);
-            if(x+3<BOARD_SQUARE && y+3<BOARD_SQUARE && board[x+3][y+3]==0) dist2=calculateDistance(x+3, y+3);
-            if(dist1<=dist2) // 1つ左上の方が中心に近い
-            {
-                p->x=x-1; p->y=y-1;
-            } else {
-                p->x=x+3; p->y=y+3;
-            }
-            break;
+            // 2つ左のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x-2, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x-2,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
+        } else { // ●○○
+            // 1つ右のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x+1, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x+1,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
 
-        case 3: // 左下に3つ
-            // 今の場所から1つ右上○○○(<-x,y)●か3つ左下●○○(x,y->)○に置くことになる
-            if(x+1<BOARD_SQUARE && y-1>=0 && board[x+1][y-1]==0) dist1=calculateDistance(x+1, y-1);
-            if(x-3>=0 && y+3<BOARD_SQUARE && board[x-3][y+3]==0) dist2=calculateDistance(x-3, y+3);
-            if(dist1<=dist2) // 1つ右上の方が中心に近い
-            {
-                p->x=x+1; p->y=y-1;
-            } else {
-                p->x=x-3; p->y=y+3;
-            }
-            break;
+            // 2つ右のコマについて，四連が成立する箇所があるか調べる
+            setFlag(board, x+2, y, &flag2);
+            memset(directions2,0,sizeof(directions2));
+            search8directions(board,x+2,y,flag2,directions2);
+            if((directions2[UPPER]+directions2[DOWN]==3) || 
+                (directions2[LEFT_UPPER]+directions2[RIGHT_DOWN]==3) ||
+                (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
+        }
     }
 }
 
-/* 4つ連続で並んでいた時に，それを防ぐための関数
- * 3つ並んだ時点で一端は阻止されているので、逆側の端を埋める
- * x,y  : 相手の並び方を確認した座標の位置(そこから右or下or右下or左下に3つ並んでいる状態)
- * p    : 座標を格納する構造体へのポインタ
- * mode : 右，下，右下，左下どちらの方向に並んでいるかを制御する．
- *        0:右方向，1:下方向，2:右下方向，3:左下方向とする 
- */
-void defense4ren(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, place *p, int mode)
+// 3個並ぶ時に，飛び四になるか調べる
+int isTobi4_3(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int directions[8])
 {
-    switch(mode)
+    /* 考え得る状況としては，(●がx,yの位置)
+     * ●○○(空)○，○(空)●○○，○●○(空)○，○(空)○●○，○○●(空)○，○(空)○○●のどれか
+     */
+    if(directions[LEFT]+directions[RIGHT]==2) // 横並びの場合
     {
-        case 0: // 右方向に4つ
-            // 今の場所から1つ左●○(<-x,y)○○○か，4つ右(x,y->)○○○○●に置くことになる。
-            // まだコマがおかれていない方に置く
-            if(x-1>=0 && board[x-1][y]==0)
-            {
-                p->x=x-1; p->y=y;
-            } else if(x+4<BOARD_SQUARE && board[x+4][y]==0) {
-                p->x=x+4; p->y=y;
-            }
-            break;
-
-        case 1: // 下方向に4つ
-            // 今の場所から1つ上●○(<-x,y)○○○か，4つ下(x,y->)○○○○●に置くことになる
-            if(y-1>=0 && board[x][y-1]==0)
-            {
-                p->x=x; p->y=y-1;
-            }
-            else if(y+4<BOARD_SQUARE && board[x][y+4]==0)
-            {
-                p->x=x; p->y=y+4;
-            }
-            break;
-
-        case 2: // 右下に4つ
-            // 今の場所から1つ左上●○(<-x,y)○○○か，4つ右下(x,y->)○○○○●に置くことになる
-            if(x-1>=0 && y-1>=0 && board[x-1][y-1]==0)
-            {
-                p->x=x-1; p->y=y-1;
-            }
-            else if(x+4<BOARD_SQUARE && y+4<BOARD_SQUARE && board[x+4][y+4]==0)
-            {
-                p->x=x+4; p->y=y+4;
-            } else {
-                p->x=-1; p->y=-1;
-            }
-            break;
-
-        case 3: // 左下に4つ
-            // 今の場所から1つ右上○○○○(<-x,y)●か4つ左下●○○○(x,y->)○に置くことになる
-            if(x+1<BOARD_SQUARE && y-1>=0 && board[x+1][y-1]==0)
-            {
-                p->x=x+1; p->y=y-1;
-            }
-            else if(x-4>=0 && y+4<BOARD_SQUARE && board[x-4][y+4]==0)
-            {
-                p->x=x-4; p->y=y+4;
-            } else {
-                p->x=-1; p->y=-1;
-            }
-            break;
+        if(directions[LEFT]&&directions[RIGHT]) // ○●○(空)○,○(空)○●○
+        {
+            if((x+3<BOARD_SQUARE && board[x+3][y]==1) || 
+                (x-3>=0 && board[x-3][y]==1)) return 1;
+        } else if(directions[LEFT]) { // ○○●(空)○,○(空)○○●
+            if((x+2<BOARD_SQUARE && board[x+2][y]==1) || 
+                (x-4>=0 && board[x-4][y]==1)) return 1;
+        } else { // ●○○(空)○,○(空)●○○
+            if((x+4<BOARD_SQUARE && board[x+4][y]==1) ||
+                (x-2>=0 && board[x-2][y]==1)) return 1;
+        }
+    } else if(directions[UPPER]+directions[DOWN]==2) { // 縦並びの場合
+        if(directions[UPPER]&&directions[DOWN]) // ○●○(空)○,○(空)○●○
+        {
+            if((y+3<BOARD_SQUARE && board[x][y+3]==1) || 
+                (y-3>=0 && board[x][y-3]==1)) return 1;
+        } else if(directions[UPPER]) { // ○○●(空)○,○(空)○○●
+            if((y+2<BOARD_SQUARE && board[x][y+2]==1) || 
+                (y-4>=0 && board[x][y-4]==1)) return 1;
+        } else { // ●○○(空)○,○(空)●○○
+            if((y+4<BOARD_SQUARE && board[x][y+4]==1) ||
+                (y-2>=0 && board[x][y-2]==1)) return 1;
+        }
+    } else if(directions[LEFT_UPPER]+directions[RIGHT_DOWN]==2) { // 左斜め並びの場合
+        if(directions[LEFT_UPPER]&&directions[RIGHT_DOWN]) // ○●○(空)○,○(空)○●○
+        {
+            if((x+3<BOARD_SQUARE && y+3<BOARD_SQUARE && board[x+3][y+3]==1) || 
+                (x-3>=0 && y-3>=0 && board[x-3][y-3]==1)) return 1;
+        } else if(directions[LEFT_UPPER]) { // ○○●(空)○,○(空)○○●
+            if((x+2<BOARD_SQUARE && y+2<BOARD_SQUARE && board[x+2][y+2]==1) || 
+                (x-4>=0 && y-4>=0 && board[x-4][y-4]==1)) return 1;
+        } else { // ●○○(空)○,○(空)●○○
+            if((x+4<BOARD_SQUARE && y+4<BOARD_SQUARE && board[x+4][y+4]==1) ||
+                (x-2>=0 && y-2>=0 && board[x-2][y-2]==1)) return 1;
+        }
+    } else { //右斜め並びの場合
+        if(directions[RIGHT_UPPER]&&directions[LEFT_DOWN]) // ○●○(空)○,○(空)○●○
+        {
+            if((x+3<BOARD_SQUARE && y-3>=0 && board[x+3][y-3]==1) || 
+                (x-3>=0 && y+3<BOARD_SQUARE && board[x-3][y+3]==1)) return 1;
+        } else if(directions[LEFT_DOWN]) { // ○○●(空)○,○(空)○○●
+            if((x+2<BOARD_SQUARE && y-2>=0 && board[x+2][y-2]==1) || 
+                (x-4>=0 && y+4<BOARD_SQUARE && board[x-4][y+4]==1)) return 1;
+        } else { // ●○○(空)○,○(空)●○○
+            if((x+4<BOARD_SQUARE && y-4>=0 && board[x+4][y-4]==1) ||
+                (x-2>=0 && y+2<BOARD_SQUARE && board[x-2][y+2]==1)) return 1;
+        }
     }
-}
-
-/* 在る座標(x,y)から中心の座標(BOARD_SQUARE/2, BOARD_SQUARE/2)までの距離を計算．
- * ユークリッド距離を用いると2乗計算，平方計算等が必要になってしまうため，マンハッタン距離で計算を行う
- */
-
-int calculateDistance(int x, int y)
-{
-    return abs(x-BOARD_SQUARE/2)+abs(y-BOARD_SQUARE/2);
+    return 0;
 }
