@@ -122,7 +122,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
 
             switch(rand_num){
                 case 0:
-                    if(board[sub_x + i][sub_y + i] == 0){
+                    if(board[sub_x + i][sub_y + i] == 0 && (sub_x+i<BOARD_SQUARE && sub_y+i<BOARD_SQUARE)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+i+1);
                         *arg_x = sub_x + i;
                         *arg_y = sub_y + i;
@@ -130,7 +130,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 1:
-                    if(board[sub_x - i][sub_y + i] == 0){
+                    if(board[sub_x - i][sub_y + i] == 0 && (sub_x-i>=0 && sub_y+i<BOARD_SQUARE)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+i+1);
                         *arg_x = sub_x - i;
                         *arg_y = sub_y + i;
@@ -138,7 +138,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 2:
-                    if(board[sub_x + i][sub_y] == 0){
+                    if(board[sub_x + i][sub_y] == 0 && (sub_x+i<BOARD_SQUARE)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y+1);
                         *arg_x = sub_x + i;
                         *arg_y = sub_y;
@@ -146,7 +146,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 3:
-                    if(board[sub_x + i][sub_y - i] == 0){
+                    if(board[sub_x + i][sub_y - i] == 0 && (sub_x+i<BOARD_SQUARE && sub_y-i>=0)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+i+1, sub_y-i+1);
                         *arg_x = sub_x + i;
                         *arg_y = sub_y - i;
@@ -154,7 +154,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 4:
-                    if(board[sub_x - i][sub_y - i] == 0){
+                    if(board[sub_x - i][sub_y - i] == 0 && (sub_x-i>=0 && sub_y-i>=0)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y-i+1);
                         *arg_x = sub_x - i;
                         *arg_y = sub_y - i;
@@ -162,7 +162,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 5:
-                    if(board[sub_x - i][sub_y] == 0){
+                    if(board[sub_x - i][sub_y] == 0 && (sub_x-i>=0)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x-i+1, sub_y+1);
                         *arg_x = sub_x - i;
                         *arg_y = sub_y;
@@ -170,7 +170,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 6:
-                    if(board[sub_x][sub_y + i] == 0){
+                    if(board[sub_x][sub_y + i] == 0 && (sub_y+i<BOARD_SQUARE)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y+i+1);
                         *arg_x = sub_x;
                         *arg_y = sub_y + i;
@@ -178,7 +178,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                     }
                     break;
                 case 7:
-                    if(board[sub_x][sub_y - i] == 0){
+                    if(board[sub_x][sub_y - i] == 0 && (sub_y-i>=0)){
                         printf("\nここに置いてください: (%d, %d)\n", sub_x+1, sub_y-i+1);
                         *arg_x = sub_x;
                         *arg_y = sub_y - i;
