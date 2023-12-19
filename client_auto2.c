@@ -196,7 +196,6 @@ int main(void) {
     }
 
     // Windows でのソケットの終了
-
     closesocket(s);
     WSACleanup();
 
