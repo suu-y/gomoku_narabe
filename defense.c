@@ -309,6 +309,7 @@ int is43(int board[BOARD_SQUARE][BOARD_SQUARE], int x, int y, int directions[8])
                 (directions2[RIGHT_UPPER]+directions2[LEFT_DOWN]==3)) return 1;
         }
     }
+    return 0;
 }
 
 // 3個並ぶ時に，飛び四になるか調べる
