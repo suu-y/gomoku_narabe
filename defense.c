@@ -3,7 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include "./defense.h"
-#include "./judge.h"
+#include "./kinzite.h"
 #define _5REN  4
 #define _4REN  3
 #define _43    2

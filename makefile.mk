@@ -1,4 +1,4 @@
-# makefile for client_auto2 and client_ver2.c and kachimake.c kinzite.c
+# makefile for client_auto2, client_ver2.c, kachimake.c, kinzite.c, defense.c, and offense.c
 # copy this command: mingw32-make -f makefile.mk
 all: client client_auto2
 client: client_ver2.o kachimake.o kinzite.o defense.o offense.o
