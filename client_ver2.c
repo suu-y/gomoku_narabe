@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <winsock2.h>
-#include "./judge.h"
+#include "./kinzite.h"
 #include "./kachimake.h"
 #include "./defense.h"
 #include "./offense.h"
@@ -125,17 +125,6 @@ int main(void) {
                 break;
             }
         } while(!turn);
-
-        // -----デバッグ用
-/*        int a,b;
-        for(a=0;a<BOARD_SQUARE;a++)
-        {
-            for(b=0;b<BOARD_SQUARE;b++)
-            {
-                printf("%d ",board[b][a]);
-            }
-            printf("\n");
-        }*/
         
         // 自分の手の禁じ手を確認
 
@@ -149,17 +138,6 @@ int main(void) {
                 prevk=prevk->next;
             }
         }
-
-        // -----デバッグ用-----
-/*        printf("元に戻したあと\n");
-        for(a=0;a<BOARD_SQUARE;a++)
-        {
-            for(b=0;b<BOARD_SQUARE;b++)
-            {
-                printf("%d ",board[b][a]);
-            }
-            printf("\n");
-        }*/
 
         win(board, x, y, message);
         /* -----ここまで----- */
