@@ -149,8 +149,8 @@ int main(void) {
                 int put_x = -1;
                 int put_y = -1;
                 offense(&put_x, &put_y, board, turn);
-                printf("次の攻め手は: (%d, %d)\n", put_x+1, put_y+1);
 
+                // 構造体に石を置く座標を格納
                 p.x = put_x;
                 p.y = put_y;
             }
