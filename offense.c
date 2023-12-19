@@ -9,12 +9,10 @@
 // 攻め・守り判定関数の返り値を受けて、攻め関数offense()が呼び出される
 void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int flag_first_second){
 
-    // TODO: 序盤とか、まだ石の数が足らない等で四三を作るに至らない時の石を置く基準を検討する
-
     /*
      * Args:
-     *  *x - 次に置く位置となるx座標
-     *  *y - 次に置く位置となるy座標
+     *  *x - 次に置く位置となるx座標（ポインタ）
+     *  *y - 次に置く位置となるy座標（ポインタ）
      *  board - 現在の盤面
      *  flag_first_second - この関数を呼び出したのかは先手か(0)後手か(1)
      * 
@@ -33,17 +31,14 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
     int flag_chouren = 0;
     int flag_43 = 0;
 
-    // 四三を作るに至らない時のために座標を格納しておく
+    // 四三を作るに至らない時のために座標を格納する変数
     int sub_x = -1;
     int sub_y = -1;
 
     // 盤面を走査して、自分の石の並び方を調査する
     for(int y=0; y<BOARD_SQUARE; y++){          // 縦方向
         for(int x=0; x<BOARD_SQUARE; x++){      // 横方向
-            
-            if(x >= (BOARD_SQUARE*2/3) && y >= (BOARD_SQUARE*2/3))    break;
-            
-            //printf("(%d, %d)\n", x+1, y+1);
+                        
             int stone_x_o = board[x][y];
             if(stone_x_o == 0){
 
@@ -95,6 +90,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                 sub_y = y;
                 flag_5ren = is_5ren_mid(&x, &y, board);
                 if(flag_5ren){
+                    // この時、端点でない箇所に石を置いて5連を作れる
                     printf("\n5連を作れます(is_5ren_mid): (%d, %d)\n", x+1, y+1);
                 }
             }
@@ -106,7 +102,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
         if(flag_5ren || flag_chouren || flag_43)   break;
     }
 
-    // 四三を作るに至らない時
+    // 四三を作るに至らない時 ==========================
     // 現在自分の石が置かれている周囲に置きに行く
     if(!flag_5ren && !flag_chouren && !flag_43){
 
@@ -180,8 +176,7 @@ void offense(int* arg_x, int* arg_y, int board[BOARD_SQUARE][BOARD_SQUARE], int 
                 default:
                     break;
             }
-            if(put_flag)    break;
-            
+            if(put_flag)    break; 
         }
     }
 }
@@ -194,16 +189,15 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      * ただし、5連の中の石がまだ置かれていない場合のみしか判定できない
      * 
      * Args:
-     *  x - 探索の起点となするx座標
-     *  y - 探索の起点となするy座標
+     *  x - 探索の起点となするx座標（ポインタ）
+     *  y - 探索の起点となするy座標（ポインタ）
      *  board - 現在の盤面の状態
      * 
      * Rtn:
      *  0 - 入力(x, y)で5連は成立しない
      *  1 - 入力(x, y)で5連が成立する
-     */
-
-    /*
+     *  また5連が成立する場合、引数の*x, *yが石を置く座標で上書きされる
+     * 
      * 方針: 盤面を9つのブロックに分けて、その位置から5連があり得る方向を探索する
      * 識別のため、テンキーの数字と同じ順でブロックに番号を付けている↓
      * 7 8 9
@@ -213,7 +207,7 @@ int is_5ren_mid(int* x, int* y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     
     int is_5ren = 0;
     int is_empty = 0;   // 5連となる箇所が空の時は真、埋まっていると偽
-    int cnt_stone = 0;
+    int cnt_stone = 0;  // 石が何個並ぶか
     int stone_x_o = board[*x][*y];
 
     int store_x = -1;
@@ -475,9 +469,7 @@ int is_5ren_edge(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
      * Rtn:
      *  0 - 入力(x, y)で5連は成立しない
      *  1 - 入力(x, y)で5連が成立する
-     */
-
-    /*
+     * 
      * 方針: 盤面を9つのブロックに分けて、その位置から5連があり得る方向を探索する
      * 識別のため、テンキーの数字と同じ順でブロックに番号を付けている　下
      * 7 8 9
@@ -950,7 +942,7 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
     int cnt_stone = 0;
 
     int flag = 0b000000000000;  // 12bitでbitごとに上記12つのフラグを管理
-    int flag_4ren = 0b00000000;         // 8bitで4連の時は特別にこのフラグを立てる
+    int flag_4ren = 0b00000000;         // 方向0-7に対して8bitで、4連の時は特別にこのフラグを立てる
 
     // 左側2連の判定
     if((x-3)>=0){     // 飛び三
@@ -1213,7 +1205,6 @@ int is_43(int x, int y, int board[BOARD_SQUARE][BOARD_SQUARE]){
 
     //printf("43-フラグ: %x\n", flag);
     int flag_tmp = flag;
-    //int flag_return = flag;   // フラグを返り値にする場合の変数宣言
     int flag_0to7 = (flag &= 0b000011111111);
     int flag_8to11 = (flag_tmp &= 0b111100000000);
     for(int i = 0; i < 8; ++i) {
